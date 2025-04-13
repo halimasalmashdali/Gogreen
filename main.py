@@ -53,6 +53,23 @@ class HomepageScreen(Screen):
     def nav_draw(self, *args):
         print("Navigation button pressed!")
 
+    def home_page(self):
+        self.manager.current = "homepage"
+
+    def challenges_page(self):
+        self.manager.current = "challenges"
+
+    def leaderboard_page(self):
+        self.manager.current = "leaderboard"
+
+    def map_page(self):
+        self.manager.current = "map"
+
+    def profile_page(self):
+        self.manager.current = "profile"
+
+
+
 
 class RegisterScreen(Screen):
     def register(self):
