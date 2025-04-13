@@ -1,5 +1,6 @@
 import sqlite3
 from kivy.app import App
+from kivy.properties import ListProperty
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.core.window import Window
 from kivy.lang import Builder
@@ -34,26 +35,27 @@ Window.size = (400, 600)
 class WelcomeScreen(Screen):
     pass
 
-class DashboardScreen(Screen):
-    pass
+class LeaderboardPage(Screen):
+        leaderboard_data = ListProperty([])
 
-class ChallengesScreen(Screen):
-    pass
+        def on_enter(self):
+            self.load_data()
 
-class VendorsScreen(Screen):
-    pass
+        def load_data(self):
+            conn = sqlite3.connect('leaderboard.db')
+            cursor = conn.cursor()
+            cursor.execute("SELECT username, points, is_current_user FROM leaderboard ORDER BY points DESC")
+            self.leaderboard_data = cursor.fetchall()
+            conn.close()
 
-class EventsScreen(Screen):
-    pass
 
-class ProfileScreen(Screen):
-    pass
-
+class HomepageScreen(Screen):
+    def nav_draw(self, *args):
+        print("Navigation button pressed!")
 
 
 class RegisterScreen(Screen):
     def register(self):
-        """Handles user registration."""
         full_name = self.ids.full_name.text
         nickname = self.ids.nickname.text
         email = self.ids.email.text
@@ -68,7 +70,6 @@ class RegisterScreen(Screen):
             print("Passwords do not match!")
             return
 
-        # Save to database
         conn = sqlite3.connect("users.db")
         cursor = conn.cursor()
         try:
@@ -76,6 +77,10 @@ class RegisterScreen(Screen):
                            (full_name, nickname, email, password))
             conn.commit()
             print("User registered successfully!")
+
+            # Redirect to homepage
+            self.manager.current = "homepage"
+
         except sqlite3.IntegrityError:
             print("Nickname or email already exists!")
         finally:
@@ -84,8 +89,7 @@ class RegisterScreen(Screen):
 
 class LoginScreen(Screen):
     def login(self):
-        """Handles user login."""
-        login_input = self.ids.login_input.text  # Can be email or nickname
+        login_input = self.ids.login_input.text
         password = self.ids.password.text
 
         conn = sqlite3.connect("users.db")
@@ -97,8 +101,26 @@ class LoginScreen(Screen):
 
         if user:
             print("Login successful!")
+
+            # Redirect to homepage
+            self.manager.current = "homepage"
+
         else:
             print("Invalid email/nickname or password!")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class GoGreenApp(MDApp):
@@ -110,6 +132,7 @@ class GoGreenApp(MDApp):
         Builder.load_file("screens/welcome_screen.kv")  # welcome .kv file
         Builder.load_file("screens/reg_screen.kv")  # registration .kv file
         Builder.load_file("screens/login_screen.kv")  # login .kv file
+        Builder.load_file("screens/home_screen.kv")  # home .kv file
 
         # Create ScreenManager and add widgets/screens
         sm = MDScreenManager()
@@ -117,11 +140,7 @@ class GoGreenApp(MDApp):
         sm.add_widget(WelcomeScreen(name="welcome"))
         sm.add_widget(LoginScreen(name="login"))
         sm.add_widget(RegisterScreen(name="register"))
-        sm.add_widget(DashboardScreen(name="dashboard"))
-        sm.add_widget(ChallengesScreen(name="challenges"))
-        sm.add_widget(VendorsScreen(name="vendors"))
-        sm.add_widget(EventsScreen(name="events"))
-        sm.add_widget(ProfileScreen(name="profile"))
+        sm.add_widget(HomepageScreen(name="homepage"))
 
         sm.current = "welcome"  # Start with WelcomeScreen
         return sm

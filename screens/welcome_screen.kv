@@ -1,0 +1,75 @@
+ScreenManager:
+    WelcomeScreen:
+
+<WelcomeScreen>:
+    FloatLayout:
+        # Top-left corner decorative image
+        Image:
+            source: "assets/photos/decor.png"  # Ensure the correct filename
+            size_hint: None, None
+            size: 180, 180  # Adjust as needed
+            pos: 0, self.parent.height - 150  # Top-left corner
+
+        # Bottom-right corner decorative image
+        Image:
+            source: "assets/photos/decor.png"
+            size_hint: None, None
+            size: 180, 180
+            pos: self.parent.width - 180, -30  # Bottom-right corner
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: 180
+                    origin: self.center
+            canvas.after:
+                PopMatrix
+
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 20
+            padding: [20, 50]
+            size_hint: 1, 0.8
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+
+            Label:
+                text: "[color=#434343]Go[/color][color=#528265]Green[/color]"
+                markup: True
+                font_size: "40sp"
+                bold: True
+                halign: "center"
+                font_name: "assets/Poppins-SemiBold.ttf"
+                size_hint_y: None
+                height: 50
+
+            Image:
+                source: "assets/photos/logo.jpg"
+                size_hint: 1, 0.6
+
+            Label:
+                text: "[color=#434343]Manage your waste effectively![/color]"
+                font_size: "14sp"
+                halign: "center"
+                markup : True
+                font_name: "assets/Poppins-SemiBold.ttf"
+                size_hint_y: None
+                height: 30
+
+            Button:
+                text: "Get Started"
+                background_normal: ""
+                background_color: 0.32, 0.51, 0.4, 1  # #528265 in RGBA
+                font_size: "18sp"
+                font_name: "assets/Poppins-SemiBold.ttf"
+                size_hint: 0.8, None
+                height: 50
+                pos_hint: {"center_x": 0.5}
+                on_release: app.root.current = "register"
+
+                canvas.before:
+                    Color:
+                        rgba: self.background_color  # Button's background color
+                    RoundedRectangle:
+                        size: self.size
+                        pos: self.pos
+                        radius: [15]  # Radius of the corners, change as needed
+

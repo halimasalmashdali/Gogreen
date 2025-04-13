@@ -1,0 +1,135 @@
+<LoginScreen>:
+    name: 'login'
+    FloatLayout:
+
+        # Decorative Top Image
+        Image:
+            source: "assets/photos/decor.png"
+            size_hint: None, None
+            size: 180, 180
+            pos: 0, self.parent.height - 150
+
+        # Decorative Bottom Image (rotated)
+        Image:
+            source: "assets/photos/decor.png"
+            size_hint: None, None
+            size: 180, 180
+            pos: self.parent.width - 180, -30
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: 180
+                    origin: self.center
+            canvas.after:
+                PopMatrix
+
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint: (0.9, None)
+            height: self.minimum_height
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            spacing: 12
+
+            # Title
+            Label:
+                text: "[size=24][color=000000]Welcome to[/color][/size]"
+                markup: True
+                halign: 'right'
+                size_hint_y: None
+                height: self.texture_size[1]
+                font_name: "assets/Poppins-SemiBold.ttf"
+
+            Label:
+                text: "[size=48][b][color=434343]Go[/color][color=528265]Green[/color][/b][/size]"
+                markup: True
+                halign: 'center'
+                valign: 'middle'
+                size_hint_y: None
+                height: self.texture_size[1]
+                font_name: "assets/Poppins-SemiBold.ttf"
+
+            Label:
+                text: "[color=434343]Welcome again! Please log in.[/color]"
+                markup: True
+                halign: 'center'
+                valign: 'middle'
+                font_size: "14sp"
+                size_hint_y: None
+                text_size: self.width, None
+                height: self.texture_size[1]
+                font_name: "assets/Poppins-SemiBold.ttf"
+
+            # Login Image (moved here!)
+            Image:
+                source: "assets/photos/login_photo.png"
+                size_hint: 1, None
+                size: 250, 250
+                allow_stretch: True
+                keep_ratio: True
+                pos_hint: {"center_x": 0.5}
+
+            # Inputs
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: 10
+                size_hint_y: None
+                height: self.minimum_height
+
+                TextInput:
+                    id: login_input
+                    font_name: "assets/Poppins-SemiBold.ttf"
+                    hint_text: "Email or Nickname"
+                    font_size: 16
+                    size_hint: 1, None
+                    height: 45
+                    background_normal: ''
+                    background_color: 1, 1, 1, 1
+                    padding: 10
+                    canvas.before:
+                        Color:
+                            rgba: 0, 0, 0, 1
+                        Line:
+                            width: 1
+                            rounded_rectangle: (*self.pos, *self.size, 20)
+
+                TextInput:
+                    id: password
+                    font_name: "assets/Poppins-SemiBold.ttf"
+                    hint_text: "Password"
+                    password: True
+                    font_size: 16
+                    size_hint: 1, None
+                    height: 45
+                    background_normal: ''
+                    background_color: 1, 1, 1, 1
+                    padding: 10
+                    canvas.before:
+                        Color:
+                            rgba: 0, 0, 0, 1
+                        Line:
+                            width: 1
+                            rounded_rectangle: (*self.pos, *self.size, 20)
+
+            # Login Button
+            Button:
+                text: "Login"
+                size_hint: 1, None
+                height: 45
+                font_name: "assets/Poppins-SemiBold.ttf"
+                background_normal: ''
+                background_color: 0, 0.6, 0, 1
+                color: 1, 1, 1, 1
+                font_size: "16sp"
+                on_press: root.login()
+
+            # Register link
+            Label:
+                text: "[color=434343]Don't have an account?[/color] [ref=register][color=2196F3]Register here[/color][/ref]"
+                markup: True
+                font_name: "assets/Poppins-SemiBold.ttf"
+                font_size: "12sp"
+                size_hint_y: None
+                height: self.texture_size[1] + 10
+                halign: "center"
+                on_ref_press:
+                    app.root.current = 'register'
