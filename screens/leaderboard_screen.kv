@@ -1,4 +1,4 @@
-<LeaderboardPage>:
+<LeaderboardScreen>:
     name: 'leaderboard'
 
     FloatLayout:
@@ -74,7 +74,7 @@
                 size_hint_x: 0.5
             MDIconButton:
                 icon: "check-circle"
-                on_release: root.challenges_page()
+                on_release: app.challenges_page()
                 theme_text_color: "Custom"
                 text_color: "white"
             Widget:
@@ -88,13 +88,13 @@
                 size_hint_x: 0.5
             MDIconButton:
                 icon: "map"
-                on_release: root.map_page()
+                on_release: app.map_page()
                 theme_text_color: "Custom"
                 text_color: "white"
             Widget:
                 size_hint_x: 0.5
             MDIconButton:
                 icon: "account"
-                on_release: root.profile_page()
+                on_release: app.profile_page()
                 theme_text_color: "Custom"
                 text_color: "white"
