@@ -1,4 +1,4 @@
-<LeaderboardScreen>:
+<LeaderboardPage>:
     name: 'leaderboard'
 
     FloatLayout:
@@ -67,7 +67,7 @@
 
             MDIconButton:
                 icon: "home"
-                on_release: root.home_page()
+                on_release: app.home_page()
                 theme_text_color: "Custom"
                 text_color: "white"
             Widget:
@@ -81,7 +81,7 @@
                 size_hint_x: 0.5
             MDIconButton:
                 icon: "trophy"
-                on_release: root.leaderboard_page()
+                on_release: app.leaderboard_page()
                 theme_text_color: "Custom"
                 text_color: "white"
             Widget:
