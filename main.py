@@ -46,7 +46,7 @@ Window.size = (400, 600)
 class WelcomeScreen(Screen):
     pass
 
-class LeaderboardPage(Screen):
+class LeaderboardScreen(Screen):
         leaderboard_data = ListProperty([])
 
         def on_enter(self):
@@ -146,7 +146,7 @@ class GoGreenApp(MDApp):
         sm.add_widget(LoginScreen(name="login"))
         sm.add_widget(RegisterScreen(name="register"))
         sm.add_widget(HomepageScreen(name="homepage"))
-        sm.add_widget(LeaderboardPage(name="leaderboard"))
+        sm.add_widget(LeaderboardScreen(name="leaderboard"))
         sm.add_widget(ProfileScreen(name="profile"))
         sm.add_widget(MapScreen(name="map"))
         sm.add_widget(ChallengesScreen(name="challenges"))
