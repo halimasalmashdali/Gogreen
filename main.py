@@ -87,6 +87,8 @@ class RegisterScreen(Screen):
             cursor.execute("INSERT INTO users (full_name, nickname, email, password) VALUES (?, ?, ?, ?)",
                            (full_name, nickname, email, password))
             conn.commit()
+            cursor.execute("INSERT INTO points (points) VALUES (0)")
+            conn.commit()
             print("User registered successfully!")
 
             # Redirect to homepage
