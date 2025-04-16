@@ -55,7 +55,7 @@ class LeaderboardScreen(Screen):
         def load_data(self):
             conn = sqlite3.connect('GoGreen.db')
             cursor = conn.cursor()
-            cursor.execute("SELECT id, challenge_id, SUM(points) FROM points GROUP BY id")
+            cursor.execute("SELECT id, SUM(points) FROM points GROUP BY id ORDER BY SUM(points) DESC")
             self.leaderboard_data = cursor.fetchall()
             conn.close()
 
