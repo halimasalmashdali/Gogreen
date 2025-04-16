@@ -18,7 +18,8 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                     full_name TEXT, 
                     nickname TEXT UNIQUE, 
                     email TEXT UNIQUE, 
-                    password TEXT)''')
+                    password TEXT,
+                    role TEXT)''')
 cursor.execute('''CREATE TABLE IF NOT EXISTS challenges (
                     challenge_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     challenge_name TEXT,
