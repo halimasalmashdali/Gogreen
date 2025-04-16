@@ -70,7 +70,7 @@ class RegisterScreen(Screen):
         full_name = self.ids.full_name.text
         nickname = self.ids.nickname.text
         email = self.ids.email.text
-        role = self.ids.text
+        role = self.ids.role.text
         password = self.ids.password.text
         confirm_password = self.ids.confirm_password.text
 
