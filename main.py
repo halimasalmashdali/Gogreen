@@ -1,9 +1,13 @@
 import sqlite3
 from kivy.app import App
-from kivy.properties import ListProperty
+from kivy.metrics import dp
+from kivy.properties import ListProperty, StringProperty, NumericProperty
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.core.window import Window
 from kivy.lang import Builder
+from kivy.uix.widget import Widget
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.card import MDCard
 from kivymd.uix.screenmanager import MDScreenManager
 
 
@@ -47,18 +51,70 @@ Window.size = (400, 600)
 class WelcomeScreen(Screen):
     pass
 
+from kivymd.uix.label import MDLabel
+from kivy.uix.boxlayout import BoxLayout
+
+class LeaderboardRow(BoxLayout):
+    nickname = StringProperty()
+    points = NumericProperty()
+    bg_color = ListProperty([1, 1, 1, 1])
+
 class LeaderboardScreen(Screen):
-        leaderboard_data = ListProperty([])
+    def on_enter(self):
+        self.load_data()
 
-        def on_enter(self):
-            self.load_data()
+    def load_data(self):
+        conn = sqlite3.connect('GoGreen.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT u.nickname, COALESCE(SUM(p.points), 0) as total_points
+            FROM users u
+            LEFT JOIN points p ON u.id = p.id
+            GROUP BY u.id
+            ORDER BY total_points DESC
+        ''')
+        data = cursor.fetchall()
+        conn.close()
 
-        def load_data(self):
-            conn = sqlite3.connect('GoGreen.db')
-            cursor = conn.cursor()
-            cursor.execute("SELECT id, SUM(points) FROM points GROUP BY id ORDER BY SUM(points) DESC")
-            self.leaderboard_data = cursor.fetchall()
-            conn.close()
+        self.ids.leaderboard_list.clear_widgets()
+        self.ids.top3_box.clear_widgets()
+
+        # Top 3 display with colors
+        top3_order = [1, 0, 2]  # Visually reorder to 2nd - 1st - 3rd
+        top3_colors = [(1, 0.84, 0, 1),(0.75, 0.75, 0.75, 1), (0.8, 0.5, 0.2, 1)]
+        top3_cards = []
+
+        for i in range(min(3, len(data))):
+            nickname, points = data[i]
+            card = MDCard(
+                orientation="vertical",
+                size_hint=(None, None),
+                size=(dp(100), dp(100)),
+                padding=dp(8),
+                md_bg_color=top3_colors[i],
+                radius=[12],
+            )
+            card.add_widget(MDLabel(text=nickname, halign="center", theme_text_color="Primary"))
+            card.add_widget(MDLabel(text=f"{points} pts", halign="center", theme_text_color="Secondary"))
+            top3_cards.append(card)
+
+        for i, idx in enumerate(top3_order):
+            if idx < len(top3_cards):
+                self.ids.top3_box.add_widget(top3_cards[idx])
+                if i < len(top3_order) - 1:
+                    self.ids.top3_box.add_widget(Widget(size_hint_x=None, width=dp(2)))
+
+        # Remaining users (4th place onwards)
+        for i, (nickname, points) in enumerate(data[3:], start=4):
+            row = LeaderboardRow(
+                nickname=nickname,
+                points=points,
+                bg_color=(0.8, 1, 0.8, 1) if App.get_running_app().current_user_nickname == nickname else (1, 1, 1, 1)
+            )
+            self.ids.leaderboard_list.add_widget(row)
+
+
+
 
 class HomepageScreen(Screen):
     def nav_draw(self, *args):
@@ -115,7 +171,7 @@ class LoginScreen(Screen):
 
         if user:
             print("Login successful!")
-
+            App.get_running_app().current_user_nickname = user[2]
             # Redirect to homepage
             self.manager.current = "homepage"
 
@@ -133,6 +189,8 @@ class ProfileScreen(Screen):
 
 class GoGreenApp(MDApp):
     def build(self):
+        current_user_nickname = None
+
         # Initialize the app first
         self.theme_cls.primary_palette = "Green"  # You can change the theme if needed
 
@@ -157,10 +215,10 @@ class GoGreenApp(MDApp):
 
         sm.current = "welcome"  # Start with WelcomeScreen
         return sm
-    
+
     def leaderboard_page(self):
         self.root.current = "leaderboard"
-    
+
     def home_page(self):
         self.root.current = "homepage"
 

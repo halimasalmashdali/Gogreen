@@ -1,7 +1,35 @@
+<LeaderboardRow@BoxLayout>:
+    orientation: "horizontal"
+    size_hint_y: None
+    height: dp(50)
+    spacing: dp(10)
+    padding: dp(10)
+    canvas.before:
+        Color:
+            rgba: root.bg_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [10]
+
+    Label:
+        text: root.nickname
+        font_size: "16sp"
+        color: (0, 0, 0, 1)
+        font_name: "assets/Poppins-SemiBold.ttf"
+
+    Label:
+        text: str(root.points)
+        font_size: "16sp"
+        halign: "right"
+        color: (0, 0, 0, 1)
+        font_name: "assets/Poppins-SemiBold.ttf"
+
 <LeaderboardScreen>:
     name: 'leaderboard'
 
     FloatLayout:
+
         Image:
             source: "assets/photos/decor.png"
             size_hint: None, None
@@ -23,78 +51,93 @@
 
         BoxLayout:
             orientation: "vertical"
-            padding: dp(10)
-            spacing: dp(10)
+            size_hint: None, None
+            size: self.minimum_size
+            pos_hint: {"center_x": 0.5, "top": 0.94}
+            spacing: dp(6)
 
-            MDLabel:
-                text: "You are currently in"
-                halign: "center"
-                font_style: "Subtitle1"
-
-            MDLabel:
-                text: "[b][color=#8B4513]Bronze[/color] League[/b]"
+            Label:
+                text: "[color=434343]Leaderboard of[/color]"
                 markup: True
-                halign: "center"
-                font_style: "H5"
+                halign: 'center'
+                valign: 'middle'
+                font_size: "14sp"
+                size_hint_y: None
+                height: self.texture_size[1]
+                font_name: "assets/Poppins-SemiBold.ttf"
+
+            Label:
+                text: "[size=48][b][color=434343]Go[/color][color=528265]Green[/color][/b][/size]"
+                markup: True
+                halign: 'center'
+                size_hint_y: None
+                height: self.texture_size[1]
+                font_name: "assets/Poppins-SemiBold.ttf"
+
+        BoxLayout:
+            orientation: "vertical"
+            spacing: dp(10)
+            padding: [dp(10), dp(170), dp(10), dp(70)]
+            size_hint: 1, 1
 
             BoxLayout:
-                orientation: "horizontal"
-                spacing: dp(10)
+                id: top3_box
                 size_hint_y: None
                 height: dp(100)
-                id: top3_box
+                orientation: "horizontal"
+                spacing: dp(20)
 
             ScrollView:
+                size_hint_y: None
+                height: dp(250)
                 MDList:
                     id: leaderboard_list
 
-            MDLabel:
-                text: "Reach 30 points to move to [b]Silver League[/b]"
-                markup: True
-                halign: "center"
-                font_style: "Body2"
+    MDBoxLayout:
+        size_hint_y: None
+        height: dp(56)
+        md_bg_color: app.theme_cls.primary_color
+        padding: dp(10)
+        pos_hint: {"x": 0, "y": 0}
 
-            MDLabel:
-                text: "Season reset in 30 days, 23:59:59"
-                halign: "center"
-                font_style: "Caption"
+        MDIconButton:
+            icon: "home"
+            on_release: root.manager.current = "homepage"
+            theme_text_color: "Custom"
+            text_color: "white"
 
-        MDBoxLayout:
-            size_hint_y: None
-            height: dp(56)
-            md_bg_color: app.theme_cls.primary_color
-            padding: dp(10)
+        Widget:
+            size_hint_x: 0.5
 
-            MDIconButton:
-                icon: "home"
-                on_release: app.home_page()
-                theme_text_color: "Custom"
-                text_color: "white"
-            Widget:
-                size_hint_x: 0.5
-            MDIconButton:
-                icon: "check-circle"
-                on_release: app.challenges_page()
-                theme_text_color: "Custom"
-                text_color: "white"
-            Widget:
-                size_hint_x: 0.5
-            MDIconButton:
-                icon: "trophy"
-                on_release: app.leaderboard_page()
-                theme_text_color: "Custom"
-                text_color: "white"
-            Widget:
-                size_hint_x: 0.5
-            MDIconButton:
-                icon: "map"
-                on_release: app.map_page()
-                theme_text_color: "Custom"
-                text_color: "white"
-            Widget:
-                size_hint_x: 0.5
-            MDIconButton:
-                icon: "account"
-                on_release: app.profile_page()
-                theme_text_color: "Custom"
-                text_color: "white"
+        MDIconButton:
+            icon: "check-circle"
+            on_release: root.manager.current = "challenges"
+            theme_text_color: "Custom"
+            text_color: "white"
+
+        Widget:
+            size_hint_x: 0.5
+
+        MDIconButton:
+            icon: "trophy"
+            on_release: root.manager.current = "leaderboard"
+            theme_text_color: "Custom"
+            text_color: "white"
+
+        Widget:
+            size_hint_x: 0.5
+
+        MDIconButton:
+            icon: "map"
+            on_release: root.manager.current = "map"
+            theme_text_color: "Custom"
+            text_color: "white"
+
+        Widget:
+            size_hint_x: 0.5
+
+        MDIconButton:
+            icon: "account"
+            on_release: root.manager.current = "profile"
+            theme_text_color: "Custom"
+            text_color: "white"
