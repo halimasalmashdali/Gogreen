@@ -201,6 +201,8 @@ class GoGreenApp(MDApp):
         Builder.load_file("screens/home_screen.kv")  # home .kv file
         Builder.load_file("screens/leaderboard_screen.kv")
         Builder.load_file("screens/challenges_screen.kv")
+        Builder.load_file("screens/map_screen.kv")
+        Builder.load_file("screens/profile_screen.kv")
 
         # Create ScreenManager and add widgets/screens
         sm = MDScreenManager()

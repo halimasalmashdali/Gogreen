@@ -1,20 +1,21 @@
-
 <ChallengesScreen>:
     name: 'leaderboard'
 
     FloatLayout:
 
+        # Top-left decor image
         Image:
             source: "assets/photos/decor.png"
             size_hint: None, None
             size: 180, 180
             pos: 0, self.parent.height - 150
 
-        Image:
-            source: "assets/photos/decor.png"
+        # Bottom-right rotated decor image
+        Widget:
             size_hint: None, None
             size: 180, 180
             pos: self.parent.width - 180, -30
+
             canvas.before:
                 PushMatrix
                 Rotate:
@@ -23,9 +24,19 @@
             canvas.after:
                 PopMatrix
 
+            Image:
+                source: "assets/photos/decor.png"
+                size: 180, 180
+                pos: self.pos
 
+        # Content layout (centered)
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint: (0.9, 0.6)
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            spacing: 12
 
-
+    # Bottom navigation bar
     MDBoxLayout:
         size_hint_y: None
         height: dp(56)
@@ -74,5 +85,3 @@
             on_release: root.manager.current = "profile"
             theme_text_color: "Custom"
             text_color: "white"
-
-
