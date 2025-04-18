@@ -1,4 +1,6 @@
 import sqlite3
+from functools import partial
+
 from kivy.app import App
 from kivy.metrics import dp
 from kivy.properties import ListProperty, StringProperty, NumericProperty
@@ -46,6 +48,10 @@ from kivy.lang import Builder
 from kivy.core.window import Window
 from kivymd.uix.label import MDLabel
 from kivy.uix.boxlayout import BoxLayout
+from kivy.clock import Clock
+
+
+
 
 Window.size = (400, 600)
 
@@ -190,6 +196,15 @@ class LoginScreen(Screen):
 class ChallengesScreen(Screen):
     pass
 
+
+
+class ChallengeDetailScreen(Screen):
+    def set_challenge(self, name, description, points):
+        self.ids.challenge_name.text = str(name)
+        self.ids.challenge_desc.text = str(description)
+        self.ids.challenge_points.text = f"Points: {points}"
+
+
 #Challenges finish
 
 #Map start
@@ -225,11 +240,26 @@ class ProfileScreen(Screen):
             container.add_widget(MDLabel(text="No active challenges.", halign="center"))
         else:
             for name, description, points in data:
-                card = MDCard(orientation="vertical", padding=dp(10), size_hint_y=None, height=dp(100), radius=[12])
-                card.add_widget(MDLabel(text=name, bold=True, font_style="H6"))
-                card.add_widget(MDLabel(text=description, theme_text_color="Secondary"))
-                card.add_widget(MDLabel(text=f"Points: {points}", theme_text_color="Hint"))
+                card = MDCard(
+                    orientation="vertical",
+                    padding=dp(10),
+                    size_hint=(None, None),
+                    size=(dp(120), dp(100)),
+                    radius=[12],
+                    md_bg_color=(0.7, 1, 0.7, 1),
+                    ripple_behavior=True,
+                )
+                card.bind(on_release=partial(self.open_challenge, name, description, points))
+
+                card.add_widget(MDLabel(text=name, bold=True, font_style="H6", halign="center"))
+                card.add_widget(MDLabel(text=f"{points} pts", theme_text_color="Secondary", halign="center"))
                 container.add_widget(card)
+
+    def open_challenge(self, name, description, points, instance):
+        detail_screen = self.manager.get_screen("challenge_detail")
+        detail_screen.set_challenge(name, description, points)
+        self.manager.current = "challenge_detail"
+
 
 #Profile finish
 
@@ -252,6 +282,7 @@ class GoGreenApp(MDApp):
         Builder.load_file("screens/challenges_screen.kv") # challenges .kv file
         Builder.load_file("screens/map_screen.kv") # map .kv file
         Builder.load_file("screens/profile_screen.kv") # profile .kv file
+        Builder.load_file("screens/challenge_details_screen.kv") # challenge details .kv file
 
         #need to add settings
         #need to add screens for solo challenges
@@ -267,6 +298,7 @@ class GoGreenApp(MDApp):
         sm.add_widget(ProfileScreen(name="profile"))
         sm.add_widget(MapScreen(name="map"))
         sm.add_widget(ChallengesScreen(name="challenges"))
+        sm.add_widget(ChallengeDetailScreen(name="challenge_detail"))
 
         sm.current = "welcome"  # Start with WelcomeScreen
         return sm

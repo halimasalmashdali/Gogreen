@@ -1,0 +1,78 @@
+<ProfileScreen>:
+    name: "profile"
+
+    MDBoxLayout:
+        orientation: "vertical"
+
+        MDTopAppBar:
+            title: "My Profile"
+            elevation: 4
+            title_color: 1, 1, 1, 1
+
+        ScrollView:
+            MDBoxLayout:
+                id: challenges_container
+                orientation: "horizontal"
+                padding: dp(10)
+                spacing: dp(10)
+                size_hint_y: None
+                height: dp(140)
+                adaptive_width: True
+
+
+
+
+
+
+
+    MDBoxLayout:
+        size_hint_y: None
+        height: dp(56)
+        md_bg_color: app.theme_cls.primary_color
+        padding: dp(10)
+        pos_hint: {"x": 0, "y": 0}
+
+        MDIconButton:
+            icon: "home"
+            on_release: root.manager.current = "homepage"
+            theme_text_color: "Custom"
+            text_color: "white"
+
+        Widget:
+            size_hint_x: 0.5
+
+        MDIconButton:
+            icon: "check-circle"
+            on_release: root.manager.current = "challenges"
+            theme_text_color: "Custom"
+            text_color: "white"
+
+        Widget:
+            size_hint_x: 0.5
+
+        MDIconButton:
+            icon: "trophy"
+            on_release: root.manager.current = "leaderboard"
+            theme_text_color: "Custom"
+            text_color: "white"
+
+        Widget:
+            size_hint_x: 0.5
+
+        MDIconButton:
+            icon: "map"
+            on_release: root.manager.current = "map"
+            theme_text_color: "Custom"
+            text_color: "white"
+
+        Widget:
+            size_hint_x: 0.5
+
+        MDIconButton:
+            icon: "account"
+            on_release: root.manager.current = "profile"
+            theme_text_color: "Custom"
+            text_color: "white"
+
+
+
