@@ -94,7 +94,7 @@ class LeaderboardScreen(Screen):
                 md_bg_color=top3_colors[i],
                 radius=[12],
             )
-            card.add_widget(MDLabel(text=nickname, halign="center", theme_text_color="Primary"))
+            card.add_widget(MDLabel(text=nickname, halign="center", theme_text_color="Primary", ))
             card.add_widget(MDLabel(text=f"{points} pts", halign="center", theme_text_color="Secondary"))
             top3_cards.append(card)
 
@@ -200,6 +200,7 @@ class GoGreenApp(MDApp):
         Builder.load_file("screens/login_screen.kv")  # login .kv file
         Builder.load_file("screens/home_screen.kv")  # home .kv file
         Builder.load_file("screens/leaderboard_screen.kv")
+        Builder.load_file("screens/challenges_screen.kv")
 
         # Create ScreenManager and add widgets/screens
         sm = MDScreenManager()
