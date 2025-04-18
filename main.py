@@ -44,16 +44,18 @@ from kivymd.uix.screenmanager import MDScreenManager
 from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.core.window import Window
+from kivymd.uix.label import MDLabel
+from kivy.uix.boxlayout import BoxLayout
+
+Window.size = (400, 600)
 
 # Set the window size
-Window.size = (400, 600)
 
 class WelcomeScreen(Screen):
     pass
 
-from kivymd.uix.label import MDLabel
-from kivy.uix.boxlayout import BoxLayout
 
+#Leaderboard start
 class LeaderboardRow(BoxLayout):
     nickname = StringProperty()
     points = NumericProperty()
@@ -113,14 +115,16 @@ class LeaderboardScreen(Screen):
             )
             self.ids.leaderboard_list.add_widget(row)
 
+#Leaderboard finish
 
-
+#Homepage start
 
 class HomepageScreen(Screen):
-    def nav_draw(self, *args):
-        print("Navigation button pressed!")
+    pass
 
+#Homepage finish
 
+#Register start
 class RegisterScreen(Screen):
     def register(self):
         full_name = self.ids.full_name.text
@@ -156,7 +160,9 @@ class RegisterScreen(Screen):
         finally:
             conn.close()
 
+#Register finish
 
+#Login start
 class LoginScreen(Screen):
     def login(self):
         login_input = self.ids.login_input.text
@@ -178,31 +184,77 @@ class LoginScreen(Screen):
         else:
             print("Invalid email/nickname or password!")
 
+#Login finish
+
+#Challenges start
 class ChallengesScreen(Screen):
     pass
 
+#Challenges finish
+
+#Map start
 class MapScreen(Screen):
     pass
 
-class ProfileScreen(Screen):
-    pass
+#Map finish
 
+#Profile start
+class ProfileScreen(Screen):
+    def on_enter(self):
+        self.load_user_challenges()
+
+    def load_user_challenges(self):
+        nickname = App.get_running_app().current_user_nickname
+        conn = sqlite3.connect("GoGreen.db")
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT c.challenge_name, c.description, p.points
+            FROM users u
+            JOIN points p ON u.id = p.id
+            JOIN challenges c ON p.challenge_id = c.challenge_id
+            WHERE u.nickname = ?
+        """, (nickname,))
+        data = cursor.fetchall()
+        conn.close()
+
+        container = self.ids.challenges_container
+        container.clear_widgets()
+
+        if not data:
+            container.add_widget(MDLabel(text="No active challenges.", halign="center"))
+        else:
+            for name, description, points in data:
+                card = MDCard(orientation="vertical", padding=dp(10), size_hint_y=None, height=dp(100), radius=[12])
+                card.add_widget(MDLabel(text=name, bold=True, font_style="H6"))
+                card.add_widget(MDLabel(text=description, theme_text_color="Secondary"))
+                card.add_widget(MDLabel(text=f"Points: {points}", theme_text_color="Hint"))
+                container.add_widget(card)
+
+#Profile finish
+
+
+
+#MAIN APP
 class GoGreenApp(MDApp):
     def build(self):
         current_user_nickname = None
 
         # Initialize the app first
-        self.theme_cls.primary_palette = "Green"  # You can change the theme if needed
+        self.theme_cls.primary_palette = "Green"  # change the theme if needed
 
         # Load the KV file after app initialization
         Builder.load_file("screens/welcome_screen.kv")  # welcome .kv file
         Builder.load_file("screens/reg_screen.kv")  # registration .kv file
         Builder.load_file("screens/login_screen.kv")  # login .kv file
         Builder.load_file("screens/home_screen.kv")  # home .kv file
-        Builder.load_file("screens/leaderboard_screen.kv")
-        Builder.load_file("screens/challenges_screen.kv")
-        Builder.load_file("screens/map_screen.kv")
-        Builder.load_file("screens/profile_screen.kv")
+        Builder.load_file("screens/leaderboard_screen.kv") # leaderboard .kv file
+        Builder.load_file("screens/challenges_screen.kv") # challenges .kv file
+        Builder.load_file("screens/map_screen.kv") # map .kv file
+        Builder.load_file("screens/profile_screen.kv") # profile .kv file
+
+        #need to add settings
+        #need to add screens for solo challenges
 
         # Create ScreenManager and add widgets/screens
         sm = MDScreenManager()
