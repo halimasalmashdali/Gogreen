@@ -223,12 +223,12 @@ class ProfileScreen(Screen):
         conn = sqlite3.connect("GoGreen.db")
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(""" 
             SELECT c.challenge_name, c.description, p.points
             FROM users u
             JOIN points p ON u.id = p.id
             JOIN challenges c ON p.challenge_id = c.challenge_id
-            WHERE u.nickname = ?
+            WHERE u.nickname = ? 
         """, (nickname,))
         data = cursor.fetchall()
         conn.close()
@@ -237,7 +237,12 @@ class ProfileScreen(Screen):
         container.clear_widgets()
 
         if not data:
-            container.add_widget(MDLabel(text="No active challenges.", halign="center"))
+            # Create a BoxLayout to ensure horizontal alignment
+            no_challenges_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(140))
+            label = MDLabel(text="No active challenges.", halign="center", size_hint=(None, None),
+                            size=(dp(200), dp(40)))
+            no_challenges_layout.add_widget(label)
+            container.add_widget(no_challenges_layout)
         else:
             for name, description, points in data:
                 card = MDCard(
@@ -259,6 +264,9 @@ class ProfileScreen(Screen):
         detail_screen = self.manager.get_screen("challenge_detail")
         detail_screen.set_challenge(name, description, points)
         self.manager.current = "challenge_detail"
+
+    def go_to_settings(self, instance):
+        self.manager.current = "settings"
 
 
 #Profile finish
