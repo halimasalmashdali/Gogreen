@@ -218,6 +218,7 @@ class ProfileScreen(Screen):
     def on_enter(self):
         self.load_user_challenges()
 
+    # ProfileScreen load_user_challenges method
     def load_user_challenges(self):
         nickname = App.get_running_app().current_user_nickname
         conn = sqlite3.connect("GoGreen.db")
@@ -239,11 +240,24 @@ class ProfileScreen(Screen):
         if not data:
             # Create a BoxLayout to ensure horizontal alignment
             no_challenges_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(140))
-            label = MDLabel(text="No active challenges.", halign="center", size_hint=(None, None),
-                            size=(dp(200), dp(40)))
+
+            # Create MDLabel for "No active challenges"
+            label = MDLabel(
+                text="No active challenges",
+                halign="center",
+                theme_text_color="Custom",
+                text_color=(0.5, 0.5, 0.5, 1),
+                font_style="Body1",
+                size_hint=(None, None),
+                size=(dp(200), dp(40)),
+                pos_hint={"center_x": 0.5, "center_y": 0.5}
+            )
+
+            # Add label to the layout and layout to the container
             no_challenges_layout.add_widget(label)
             container.add_widget(no_challenges_layout)
         else:
+            # Add challenges to the container as usual
             for name, description, points in data:
                 card = MDCard(
                     orientation="vertical",
@@ -265,7 +279,7 @@ class ProfileScreen(Screen):
         detail_screen.set_challenge(name, description, points)
         self.manager.current = "challenge_detail"
 
-    def go_to_settings(self, instance):
+    def congs(self, instance):
         self.manager.current = "settings"
 
 

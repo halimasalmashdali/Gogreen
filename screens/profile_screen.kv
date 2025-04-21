@@ -1,32 +1,57 @@
 <ProfileScreen>:
-    name: "profile"
+    name: 'profile'
 
-    MDBoxLayout:
-        orientation: "vertical"
-        padding: dp(10)
+    FloatLayout:
 
-        # Top section with "My Profile" and Settings icon
+        # Top-left decor
+        Image:
+            source: "assets/photos/decor.png"
+            size_hint: None, None
+            size: 180, 180
+            pos: 0, self.parent.height - 150
+
+        # Bottom-right rotated decor
+        Image:
+            source: "assets/photos/decor.png"
+            size_hint: None, None
+            size: 180, 180
+            pos: self.parent.width - 180, -30
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: 180
+                    origin: self.center
+            canvas.after:
+                PopMatrix
+
+        # Top section: Profile title and settings icon
         BoxLayout:
-            orientation: "horizontal"
+            orientation: "vertical"
             size_hint_y: None
-            height: dp(60)
+            height: dp(100)
+            pos_hint: {"top": 1}
+            spacing: dp(6)
 
-            Label:
-                text: "[b][color=528265]My Profile[/color][/b]"
-                font_size: "24sp"
-                markup: True
-                halign: "center"
-                valign: "middle"
-                font_name: "assets/Poppins-SemiBold.ttf"
-                text_size: self.size
-                size_hint_x: 0.8
+            RelativeLayout:
+                size_hint_y: None
+                height: dp(40)
 
-            MDIconButton:
-                icon: "cogs"
-                theme_text_color: "Custom"
-                icon_color: 0.325, 0.510, 0.396, 1
-                size_hint_x: 0.2
-                on_release: root.manager.current = 'settings'
+                Label:
+                    text: "[b][color=528265]My Profile[/color][/b]"
+                    markup: True
+                    font_size: "24sp"
+                    font_name: "assets/Poppins-SemiBold.ttf"
+                    halign: "center"
+                    valign: "middle"
+                    text_size: self.size
+                    size_hint: 1, 1
+
+                MDIconButton:
+                    icon: "cogs"
+                    theme_text_color: "Custom"
+                    icon_color: 0.325, 0.510, 0.396, 1
+                    pos_hint: {"right": 1}
+                    on_release: root.manager.current = 'settings'
 
         # Scrollable challenge section
         ScrollView:
@@ -35,18 +60,19 @@
                 orientation: "horizontal"
                 padding: dp(10)
                 spacing: dp(10)
-                size_hint_y: None
+                size_hint_y: 0.9
                 height: dp(100)
                 adaptive_width: True
 
-        # Congrats button
+
+        # Congs button
         MDFlatButton:
-            text: "Congrats"
+            text: "Configurations"
             theme_text_color: "Custom"
             text_color: 1, 1, 1, 1
-            on_release: root.show_congrats()
+            on_release: root.congs()
 
-        # Bottom navigation bar (original version restored)
+        # Bottom navigation bar
         MDBoxLayout:
             size_hint_y: None
             height: dp(56)
