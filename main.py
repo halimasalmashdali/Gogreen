@@ -136,11 +136,10 @@ class RegisterScreen(Screen):
         full_name = self.ids.full_name.text
         nickname = self.ids.nickname.text
         email = self.ids.email.text
-        role = self.ids.role.text
         password = self.ids.password.text
         confirm_password = self.ids.confirm_password.text
 
-        if not full_name or not nickname or not email or not role or not password:
+        if not full_name or not nickname or not email or not password:
             print("All fields are required!")
             return
 
@@ -151,8 +150,8 @@ class RegisterScreen(Screen):
         conn = sqlite3.connect("Gogreen.db")
         cursor = conn.cursor()
         try:
-            cursor.execute("INSERT INTO users (full_name, nickname, email, role, password) VALUES (?, ?, ?, ?, ?)",
-                           (full_name, nickname, email, role, password))
+            cursor.execute("INSERT INTO users (full_name, nickname, email, password) VALUES (?, ?, ?, ?)",
+                           (full_name, nickname, email, password))
             conn.commit()
             cursor.execute("INSERT INTO points (points) VALUES (0)")
             conn.commit()
