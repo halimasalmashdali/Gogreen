@@ -288,8 +288,9 @@ class ProfileScreen(Screen):
 
 #MAIN APP
 class GoGreenApp(MDApp):
+    current_user_nickname = None
+
     def build(self):
-        current_user_nickname = None
 
         # Initialize the app first
         self.theme_cls.primary_palette = "Green"  # change the theme if needed
