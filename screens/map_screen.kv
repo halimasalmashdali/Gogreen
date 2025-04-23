@@ -1,8 +1,12 @@
-
+#:import MapView kivy_garden.mapview.MapView
 <MapScreen>:
     name: 'map'
 
     FloatLayout:
+        MapView:
+            zoom: 11
+            lat: 41.2995
+            lon: 69.2401
 
         Image:
             source: "assets/photos/decor.png"
