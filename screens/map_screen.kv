@@ -8,26 +8,6 @@
             lat: 41.2995
             lon: 69.2401
 
-        Image:
-            source: "assets/photos/decor.png"
-            size_hint: None, None
-            size: 180, 180
-            pos: 0, self.parent.height - 150
-
-        Image:
-            source: "assets/photos/decor.png"
-            size_hint: None, None
-            size: 180, 180
-            pos: self.parent.width - 180, -30
-            canvas.before:
-                PushMatrix
-                Rotate:
-                    angle: 180
-                    origin: self.center
-            canvas.after:
-                PopMatrix
-
-
 
 
     MDBoxLayout:

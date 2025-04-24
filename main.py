@@ -278,12 +278,17 @@ class ProfileScreen(Screen):
         detail_screen.set_challenge(name, description, points)
         self.manager.current = "challenge_detail"
 
-    def congs(self, instance):
+    def settings(self):
+        print("Settings button pressed")  # ← you should see this in terminal
         self.manager.current = "settings"
 
 
 #Profile finish
 
+#Settings start
+
+class SettingsScreen(Screen):
+    pass
 
 
 #MAIN APP
@@ -339,6 +344,7 @@ class GoGreenApp(MDApp):
 
     def profile_page(self):
         self.root.current = "profile"
+
 
 if __name__ == "__main__":
     GoGreenApp().run()

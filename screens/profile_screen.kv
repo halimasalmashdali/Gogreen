@@ -34,7 +34,7 @@
 
             RelativeLayout:
                 size_hint_y: None
-                height: dp(40)
+                height: dp(100)  # Ensure layout height is enough for the button
 
                 Label:
                     text: "[b][color=528265]My Profile[/color][/b]"
@@ -46,13 +46,6 @@
                     text_size: self.size
                     size_hint: 1, 1
 
-                MDIconButton:
-                    icon: "cogs"
-                    theme_text_color: "Custom"
-                    icon_color: 0.325, 0.510, 0.396, 1
-                    pos_hint: {"right": 1}
-                    on_release: root.manager.current = 'settings'
-
         # Scrollable challenge section
         ScrollView:
             MDBoxLayout:
@@ -63,14 +56,6 @@
                 size_hint_y: 0.9
                 height: dp(100)
                 adaptive_width: True
-
-
-        # Congs button
-        MDFlatButton:
-            text: "Configurations"
-            theme_text_color: "Custom"
-            text_color: 1, 1, 1, 1
-            on_release: root.congs()
 
         # Bottom navigation bar
         MDBoxLayout:
