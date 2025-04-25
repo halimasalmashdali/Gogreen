@@ -1,21 +1,20 @@
 <ChallengesScreen>:
-    name: 'leaderboard'
-
+    name: 'challenges'
+    
     FloatLayout:
+        
+        
 
-        # Top-left decor image
         Image:
             source: "assets/photos/decor.png"
             size_hint: None, None
             size: 180, 180
             pos: 0, self.parent.height - 150
 
-        # Bottom-right rotated decor image
-        Widget:
+        Widget:  # Bottom-right rotated decor
             size_hint: None, None
             size: 180, 180
             pos: self.parent.width - 180, -30
-
             canvas.before:
                 PushMatrix
                 Rotate:
@@ -23,65 +22,69 @@
                     origin: self.center
             canvas.after:
                 PopMatrix
-
             Image:
                 source: "assets/photos/decor.png"
                 size: 180, 180
                 pos: self.pos
 
-        # Content layout (centered)
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint: (0.9, 0.6)
-            pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            spacing: 12
 
-    # Bottom navigation bar
-    MDBoxLayout:
-        size_hint_y: None
-        height: dp(56)
-        md_bg_color: app.theme_cls.primary_color
-        padding: dp(10)
-        pos_hint: {"x": 0, "y": 0}
+        ScrollView:
+            GridLayout:
+                id: content_area
+                cols: 2  # Set number of columns
+                orientation: 'lr-tb'
+                spacing: dp(20)
+                padding: dp(20)
+                size_hint_y: None
+                height: self.minimum_height 
 
-        MDIconButton:
-            icon: "home"
-            on_release: root.manager.current = "homepage"
-            theme_text_color: "Custom"
-            text_color: "white"
+            
 
-        Widget:
-            size_hint_x: 0.5
+        MDBoxLayout:
+            size_hint_y: None
+            height: dp(56)
+            md_bg_color: app.theme_cls.primary_color
+            padding: dp(10)
+            pos_hint: {"bottom": 1}  # Changed from "top" to "bottom"
+            
+            MDIconButton:
+                icon: "home"
+                on_release: root.manager.current = "homepage"
+                theme_text_color: "Custom"
+                text_color: "white"
 
-        MDIconButton:
-            icon: "check-circle"
-            on_release: root.manager.current = "challenges"
-            theme_text_color: "Custom"
-            text_color: "white"
+            Widget:
+                size_hint_x: 0.5
 
-        Widget:
-            size_hint_x: 0.5
+            MDIconButton:
+                icon: "check-circle"
+                theme_text_color: "Custom"
+                text_color: "white"
 
-        MDIconButton:
-            icon: "trophy"
-            on_release: root.manager.current = "leaderboard"
-            theme_text_color: "Custom"
-            text_color: "white"
+            Widget:
+                size_hint_x: 0.5
 
-        Widget:
-            size_hint_x: 0.5
+            MDIconButton:
+                icon: "trophy"
+                on_release: root.manager.current = "leaderboard"
+                theme_text_color: "Custom"
+                text_color: "white"
 
-        MDIconButton:
-            icon: "map"
-            on_release: root.manager.current = "map"
-            theme_text_color: "Custom"
-            text_color: "white"
+            Widget:
+                size_hint_x: 0.5
 
-        Widget:
-            size_hint_x: 0.5
+            MDIconButton:
+                icon: "map"
+                on_release: root.manager.current = "map"
+                theme_text_color: "Custom"
+                text_color: "white"
 
-        MDIconButton:
-            icon: "account"
-            on_release: root.manager.current = "profile"
-            theme_text_color: "Custom"
-            text_color: "white"
+            Widget:
+                size_hint_x: 0.5
+
+            MDIconButton:
+                icon: "account"
+                on_release: root.manager.current = "profile"
+                theme_text_color: "Custom"
+    
+                text_color: "white"
