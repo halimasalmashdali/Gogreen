@@ -37,8 +37,13 @@ from kivymd.uix.label import MDLabel
 Window.size = (400, 600)
 
 # Database setup
+import sqlite3
+
+# Connect to the database
 conn = sqlite3.connect("GoGreen.db")
 cursor = conn.cursor()
+
+# Create 'users' table
 cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     full_name TEXT, 
@@ -46,6 +51,8 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                     email TEXT UNIQUE, 
                     password TEXT,
                     role TEXT)''')
+
+# Drop the 'challenges' table if it exists, then recreate it
 cursor.execute('''DROP TABLE IF EXISTS challenges''')
 cursor.execute('''CREATE TABLE IF NOT EXISTS challenges (
                     challenge_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,11 +60,17 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS challenges (
                     description TEXT,
                     points INTEGER,
                     completed BOOLEAN)''')
+
+# Drop the 'points' table (if needed) and create it
+cursor.execute('''DROP TABLE IF EXISTS points''')  # This drops the table, make sure you don't need the data
 cursor.execute('''CREATE TABLE IF NOT EXISTS points (
                     challenge_id INTEGER,
                     user_id INTEGER,
+                    points INTEGER DEFAULT 0,
                     FOREIGN KEY (challenge_id) REFERENCES challenges(challenge_id),
                     FOREIGN KEY (user_id) REFERENCES users(user_id))''')
+
+# Create 'user_progress' table
 cursor.execute('''CREATE TABLE IF NOT EXISTS user_progress (
                     user_id INTEGER,
                     challenge_id INTEGER,
@@ -67,12 +80,21 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS user_progress (
                     FOREIGN KEY(user_id) REFERENCES users(user_id),
                     FOREIGN KEY(challenge_id) REFERENCES challenges(challenge_id),
                     PRIMARY KEY(user_id, challenge_id))''')
+
+# Create 'trees' table
 cursor.execute('''CREATE TABLE IF NOT EXISTS trees (
                     tree_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     tree_name TEXT,
                     tree_type TEXT,
                     description TEXT)''')
+
+# Enable foreign key constraints (ensure that foreign keys work)
+cursor.execute('PRAGMA foreign_keys = ON')
+
+# Commit the changes and close the connection
+conn.commit()
 conn.close()
+
 
 Window.size = (400, 600)
 
@@ -97,13 +119,14 @@ class LeaderboardScreen(Screen):
     def load_data(self):
         conn = sqlite3.connect('GoGreen.db')
         cursor = conn.cursor()
-        cursor.execute('''
-            SELECT u.nickname, COALESCE(SUM(p.points), 0) as total_points
-            FROM users u
-            LEFT JOIN points p ON u.id = p.id
-            GROUP BY u.id
-            ORDER BY total_points DESC
-        ''')
+        cursor.execute(''' 
+                SELECT u.nickname, COALESCE(SUM(p.points), 0) as total_points
+                FROM users u
+                LEFT JOIN points p ON u.user_id = p.user_id  -- Corrected the field to user_id
+                GROUP BY u.user_id  -- Corrected the field to user_id
+                ORDER BY total_points DESC
+            ''')
+
         data = cursor.fetchall()
         conn.close()
 
@@ -359,10 +382,11 @@ class ProfileScreen(Screen):
         cursor.execute(""" 
             SELECT c.challenge_name, c.description, p.points
             FROM users u
-            JOIN points p ON u.id = p.id
+            JOIN points p ON u.user_id = p.user_id  -- Corrected join condition
             JOIN challenges c ON p.challenge_id = c.challenge_id
             WHERE u.nickname = ? 
         """, (nickname,))
+
         data = cursor.fetchall()
         conn.close()
 

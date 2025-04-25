@@ -38,6 +38,26 @@ for full_name, nickname, email, password in users:
         print(f"Skipping {nickname} due to error: {e}")
 
 
+
+import sqlite3
+
+# Connect to your database
+conn = sqlite3.connect('GoGreen.db')
+cursor = conn.cursor()
+
+# Check the table schema
+cursor.execute("PRAGMA table_info(p);")
+columns = cursor.fetchall()
+print(columns)  # This will show the columns of table 'p'
+
+# Execute your query, ensuring the column exists
+cursor.execute("SELECT p.points FROM p;")
+result = cursor.fetchall()
+print(result)
+
+conn.close()
+
+
 conn.commit()
 conn.close()
 
