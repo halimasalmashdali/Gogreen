@@ -1,16 +1,37 @@
 import sqlite3
 from functools import partial
 
+#all kivy imports
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.stacklayout import StackLayout
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.screenmanager import Screen, ScreenManager
+from kivy.uix.widget import Widget
+from kivy.clock import Clock
 from kivy.app import App
 from kivy.metrics import dp
 from kivy.properties import ListProperty, StringProperty, NumericProperty
-from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.core.window import Window
 from kivy.lang import Builder
-from kivy.uix.widget import Widget
+from kivy.uix.button import Button
+from kivy.uix.progressbar import ProgressBar
+from kivy.graphics import Color, Rectangle
+from kivy.properties import NumericProperty
+
+#imports for map
+from kivy_garden.mapview import MapView
+from kivy_garden.mapview import MapSource, MapMarkerPopup
+
+#imports for challenges
+from random import random
+
+#all kivymd imports
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.card import MDCard
 from kivymd.uix.screenmanager import MDScreenManager
+from kivymd.app import MDApp
+from kivymd.uix.screenmanager import MDScreenManager
+from kivymd.uix.label import MDLabel
 
 
 # Set the window size
@@ -20,36 +41,34 @@ Window.size = (400, 600)
 conn = sqlite3.connect("GoGreen.db")
 cursor = conn.cursor()
 cursor.execute('''CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     full_name TEXT, 
                     nickname TEXT UNIQUE, 
                     email TEXT UNIQUE, 
                     password TEXT,
                     role TEXT)''')
+cursor.execute('''DROP TABLE IF EXISTS challenges''') 
 cursor.execute('''CREATE TABLE IF NOT EXISTS challenges (
                     challenge_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     challenge_name TEXT,
-                    points INTEGER, 
-                    description TEXT)''')
-cursor.execute('''CREATE TABLE IF NOT EXISTS points(
-                    id INTEGER,
-                    challenge_id INTEGER,
+                    description TEXT,
                     points INTEGER,
-                    FOREIGN KEY (id) REFERENCES users(id),
-                    FOREIGN KEY (challenge_id) REFERENCES challenges(challenge_id))''')
-conn.commit()
+                    completed BOOLEAN)''')
+cursor.execute('''CREATE TABLE IF NOT EXISTS points (
+                    challenge_id INTEGER,
+                    user_id INTEGER,
+                    FOREIGN KEY (challenge_id) REFERENCES challenges(challenge_id),
+                    FOREIGN KEY (user_id) REFERENCES users(user_id))''')
+cursor.execute('''CREATE TABLE IF NOT EXISTS user_progress (
+                    user_id INTEGER,
+                    challenge_id INTEGER,
+                    current_progress INTEGER DEFAULT 0,
+                    target_progress INTEGER,
+                    completed BOOLEAN DEFAULT FALSE,
+                    FOREIGN KEY(user_id) REFERENCES users(user_id),
+                    FOREIGN KEY(challenge_id) REFERENCES challenges(challenge_id),
+                    PRIMARY KEY(user_id, challenge_id))''')
 conn.close()
-
-
-from kivymd.app import MDApp
-from kivymd.uix.screenmanager import MDScreenManager
-from kivy.uix.screenmanager import Screen
-from kivy.lang import Builder
-from kivy.core.window import Window
-from kivymd.uix.label import MDLabel
-from kivy.uix.boxlayout import BoxLayout
-from kivy.clock import Clock
-
 
 
 
@@ -193,9 +212,71 @@ class LoginScreen(Screen):
 
 #Challenges start
 class ChallengesScreen(Screen):
-    pass
+    def default_challenges(self):
+        conn = sqlite3.connect("GoGreen.db")
+        cursor = conn.cursor()
+        try:
+            cursor.execute("DELETE FROM challenges")
+            
+            cursor.execute('''
+                INSERT INTO challenges(challenge_name, description, points, completed) VALUES
+                    ("Use Reusable Bags", "Use reusable shopping bags 5 times", 10, FALSE),
+                    ("Take Care Of A Plant", "Water a Plant for a month", 20, FALSE),
+                    ("Lights Off", "Turn off unused lights 15 times", 5, FALSE),
+                    ("Avoid Plastic Bags", "Avoid using plastic bags for shopping 3 times", 10, FALSE),
+                    ("Recycle Plastic", "Put 20 plastic materials you find into recycle bins", 30, FALSE),  
+                    ("Public Transport", "Use public transportation 5 times", 20, FALSE),   
+                    ("Use Less Water", "Turn off running water 15 times", 10, FALSE), 
+                    ("Plant A Plant", "Plant any type of plant and take care of it for a month", 50, FALSE),
+                    ("Use Reusable Bottles", "Do not purchase or use plastic bottles for a month", 5, FALSE),
+                    ("Don't Use Plastic", "Avoid the usage of any plastic materials for a week", 20, FALSE)
+            ''')
+            conn.commit()
+        finally:
+            cursor.close()
+            conn.close()
 
-
+    def on_enter(self):
+        if not hasattr(self, 'content_added'):
+            self.stack_layout = StackLayout(
+                orientation='lr-tb',
+                spacing=10,
+                padding=10
+            )
+            
+            conn = sqlite3.connect("GoGreen.db")
+            conn.row_factory = sqlite3.Row 
+            cursor = conn.cursor()
+            
+            try:
+                cursor.execute("SELECT challenge_name, points FROM challenges")
+                for index, row in enumerate(cursor):
+                    b = Button(
+                        text=f"{row['challenge_name']} ({row['points']} pts)", 
+                        size_hint=(None, None),
+                        size=(dp(160), dp(120)),
+                        background_normal="",
+                        background_color=(0, 0.5+random()/2, 0.5+random()/2, 1),
+                        color=(1, 1, 1, 1),
+                        font_size='12sp',
+                        bold=True,
+                        on_press = self.start
+                    )
+                    self.pb = ProgressBar(max=100)
+                    self.pb.value = 0
+                    self.stack_layout.add_widget(b)
+                    self.stack_layout.add_widget(self.pb)
+                self.ids.content_area.add_widget(self.stack_layout)
+                self.content_added = True
+                
+            finally:
+                cursor.close()
+                conn.close()
+    def next(self,dt):
+        if self.pb.value<100:
+            self.pb.value +=1
+    def start(self,obj):
+        Clock.schedule_interval(self.next, 1/25)  
 
 class ChallengeDetailScreen(Screen):
     def set_challenge(self, name, description, points):
@@ -208,7 +289,9 @@ class ChallengeDetailScreen(Screen):
 
 #Map start
 class MapScreen(Screen):
-    pass
+    def on_start(self):
+        marker = MapMarkerPopup(lat= 41, lon=69)
+        self.root.add_widget(marker)
 
 #Map finish
 
@@ -278,17 +361,12 @@ class ProfileScreen(Screen):
         detail_screen.set_challenge(name, description, points)
         self.manager.current = "challenge_detail"
 
-    def settings(self):
-        print("Settings button pressed")  # ← you should see this in terminal
+    def congs(self, instance):
         self.manager.current = "settings"
 
 
 #Profile finish
 
-#Settings start
-
-class SettingsScreen(Screen):
-    pass
 
 
 #MAIN APP
@@ -311,6 +389,7 @@ class GoGreenApp(MDApp):
         Builder.load_file("screens/profile_screen.kv") # profile .kv file
         Builder.load_file("screens/challenge_details_screen.kv") # challenge details .kv file
 
+        ChallengesScreen().default_challenges()
         #need to add settings
         #need to add screens for solo challenges
 
@@ -344,7 +423,6 @@ class GoGreenApp(MDApp):
 
     def profile_page(self):
         self.root.current = "profile"
-
 
 if __name__ == "__main__":
     GoGreenApp().run()
