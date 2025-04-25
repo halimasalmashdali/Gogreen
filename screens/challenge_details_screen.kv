@@ -9,7 +9,7 @@
 
         MDTopAppBar:
             title: "Challenge Details"
-            left_action_items: [["arrow-left", lambda x: setattr(app.root, 'current', 'profile')]]
+            left_action_items: [["arrow-left", lambda x: setattr(app.root, 'current', 'challenges')]]
 
         MDBoxLayout:
             orientation: "vertical"
@@ -31,3 +31,7 @@
                 id: challenge_points
                 text: "Points: 0"
                 halign: "center"
+
+            ProgressBar:
+                id: challenge_progress
+                max: 100
