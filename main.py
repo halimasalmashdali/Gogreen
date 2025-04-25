@@ -361,9 +361,28 @@ class ChallengeDetailScreen(Screen):
 
 # Map start
 class MapScreen(Screen):
-    def on_start(self):
-        marker = MapMarkerPopup(lat=41, lon=69)
-        self.root.add_widget(marker)
+    def on_enter(self):
+        mapview = self.ids.mapview
+        conn = sqlite3.connect("GoGreen.db")
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("SELECT lat, lon FROM trees")
+            trees = cursor.fetchall()
+
+            for tree in trees:
+                marker = MapMarkerPopup(
+                    lat=tree['lat'],  
+                    lon=tree['lon'],
+                    source='assets/tree_icon.png'  
+                )
+                mapview.add_marker(marker)
+
+        finally:
+            cursor.close()
+            conn.close()
+
 
 
 # Map finish
