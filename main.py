@@ -68,6 +68,11 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS user_progress (
                     FOREIGN KEY(user_id) REFERENCES users(user_id),
                     FOREIGN KEY(challenge_id) REFERENCES challenges(challenge_id),
                     PRIMARY KEY(user_id, challenge_id))''')
+cursor.execute('''CREATE TABLE IF NOT EXISTS trees (
+                    tree_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    tree_name TEXT,
+                    tree_type TEXT,
+                    description TEXT)''')
 conn.close()
 
 
