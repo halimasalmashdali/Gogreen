@@ -82,11 +82,14 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS user_progress (
                     PRIMARY KEY(user_id, challenge_id))''')
 
 # Create 'trees' table
+cursor.execute('''DROP TABLE IF EXISTS trees''')
 cursor.execute('''CREATE TABLE IF NOT EXISTS trees (
                     tree_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     tree_name TEXT,
                     tree_type TEXT,
-                    description TEXT)''')
+                    description TEXT,
+                    lat REAL,
+                    lon REAL)''')
 
 # Enable foreign key constraints (ensure that foreign keys work)
 cursor.execute('PRAGMA foreign_keys = ON')
