@@ -4,9 +4,18 @@
 
     FloatLayout:
         MapView:
+            id: mapview
             lat: 41
             lon: 69
             zoom: 3
+        MapMarkerPopup:
+            source: "custom_marker.png"
+            lat: 41
+            lon: 69
+            Button:
+                on_release:
+                    #root.center_on(41,69)
+                    print(root.get_bbox())
 
 
 
