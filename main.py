@@ -96,19 +96,19 @@ class LeaderboardRow(BoxLayout):
 
 
 class LeaderboardScreen(Screen):
-    def on_enter(self):
+    pass
+''' def on_enter(self):
         self.load_data()
 
     def load_data(self):
         conn = sqlite3.connect('GoGreen.db')
         cursor = conn.cursor()
-        cursor.execute(''' 
+        cursor.execute(
                 SELECT u.nickname, COALESCE(SUM(p.points), 0) as total_points
                 FROM users u
                 LEFT JOIN points p ON u.user_id = p.user_id  -- Corrected the field to user_id
                 GROUP BY u.user_id  -- Corrected the field to user_id
-                ORDER BY total_points DESC
-            ''')
+                ORDER BY total_points DESC )
 
         data = cursor.fetchall()
         conn.close()
@@ -148,7 +148,7 @@ class LeaderboardScreen(Screen):
                 points=points,
                 bg_color=(0.8, 1, 0.8, 1) if App.get_running_app().current_user_nickname == nickname else (1, 1, 1, 1)
             )
-            self.ids.leaderboard_list.add_widget(row)
+            self.ids.leaderboard_list.add_widget(row) '''
 
 
 # Leaderboard finish
@@ -332,7 +332,8 @@ class MapScreen(Screen):
 
 # Profile start
 class ProfileScreen(Screen):
-    def on_enter(self):
+    pass
+'''    def on_enter(self):
         self.load_user_challenges()
 
     # ProfileScreen load_user_challenges method
@@ -398,7 +399,7 @@ class ProfileScreen(Screen):
         self.manager.current = "challenge_detail"
 
     def congs(self, instance):
-        self.manager.current = "settings"
+        self.manager.current = "settings"'''
 
 
 # Profile finish
@@ -456,9 +457,6 @@ class GoGreenApp(MDApp):
     def profile_page(self):
         self.root.current = "profile"
 
-
-if __name__ == "__main__":
-    GoGreenApp().run()
 
 if __name__ == "__main__":
     GoGreenApp().run()
