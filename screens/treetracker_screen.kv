@@ -1,0 +1,74 @@
+<TreeTracker>:
+    name: 'treetracker'
+
+    FloatLayout:
+        Image:
+            source: "assets/photos/decor.png"
+            size_hint: None, None
+            size: 180, 180
+            pos: 0, self.parent.height - 150
+
+        Widget:  # Bottom-right rotated decor
+            size_hint: None, None
+            size: 180, 180
+            pos: self.parent.width - 180, -30
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: 180
+                    origin: self.center
+            canvas.after:
+                PopMatrix
+            Image:
+                source: "assets/photos/decor.png"
+                size: 180, 180
+                pos: self.pos
+
+        MDBoxLayout:
+            size_hint_y: None
+            height: dp(56)
+            md_bg_color: app.theme_cls.primary_color
+            padding: dp(10)
+            pos_hint: {"bottom": 1}  # Changed from "top" to "bottom"
+            
+            MDIconButton:
+                icon: "home"
+                on_release: root.manager.current = "homepage"
+                theme_text_color: "Custom"
+                text_color: "white"
+
+            Widget:
+                size_hint_x: 0.5
+
+            MDIconButton:
+                icon: "forest"
+                theme_text_color: "Custom"
+                text_color: "white"
+
+            Widget:
+                size_hint_x: 0.5
+
+            MDIconButton:
+                icon: "trophy"
+                on_release: root.manager.current = "leaderboard"
+                theme_text_color: "Custom"
+                text_color: "white"
+
+            Widget:
+                size_hint_x: 0.5
+
+            MDIconButton:
+                icon: "map"
+                on_release: root.manager.current = "map"
+                theme_text_color: "Custom"
+                text_color: "white"
+
+            Widget:
+                size_hint_x: 0.5
+
+            MDIconButton:
+                icon: "account"
+                on_release: root.manager.current = "profile"
+                theme_text_color: "Custom"
+    
+                text_color: "white"
