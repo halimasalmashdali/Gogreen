@@ -52,44 +52,24 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                     password TEXT,
                     role TEXT)''')
 
-# Drop the 'challenges' table if it exists, then recreate it
-cursor.execute('''DROP TABLE IF EXISTS challenges''')
-cursor.execute('''CREATE TABLE IF NOT EXISTS challenges (
-                    challenge_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    challenge_name TEXT,
-                    description TEXT,
-                    points INTEGER,
-                    completed BOOLEAN)''')
-
 # Drop the 'points' table (if needed) and create it
 cursor.execute('''DROP TABLE IF EXISTS points''')  # This drops the table, make sure you don't need the data
 cursor.execute('''CREATE TABLE IF NOT EXISTS points (
-                    challenge_id INTEGER,
+                    tree_id INTEGER,
                     user_id INTEGER,
                     points INTEGER DEFAULT 0,
-                    FOREIGN KEY (challenge_id) REFERENCES challenges(challenge_id),
+                    FOREIGN KEY (tree_id) REFERENCES trees(tree_id),
                     FOREIGN KEY (user_id) REFERENCES users(user_id))''')
-
-# Create 'user_progress' table
-cursor.execute('''CREATE TABLE IF NOT EXISTS user_progress (
-                    user_id INTEGER,
-                    challenge_id INTEGER,
-                    current_progress INTEGER DEFAULT 0,
-                    target_progress INTEGER,
-                    completed BOOLEAN DEFAULT FALSE,
-                    FOREIGN KEY(user_id) REFERENCES users(user_id),
-                    FOREIGN KEY(challenge_id) REFERENCES challenges(challenge_id),
-                    PRIMARY KEY(user_id, challenge_id))''')
 
 # Create 'trees' table
 cursor.execute('''DROP TABLE IF EXISTS trees''')
 cursor.execute('''CREATE TABLE IF NOT EXISTS trees (
                     tree_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    tree_name TEXT,
-                    tree_type TEXT,
+                    user_id INTEGER,
                     description TEXT,
                     lat REAL,
-                    lon REAL)''')
+                    lon REAL,
+                    FOREIGN KEY(user_id) REFERENCES users(user_id))''')
 
 # Enable foreign key constraints (ensure that foreign keys work)
 cursor.execute('PRAGMA foreign_keys = ON')
@@ -255,112 +235,57 @@ import sqlite3
 from kivymd.uix.card import MDCard
 from kivymd.uix.label import MDLabel
 
-class ChallengesScreen(Screen):
-    def default_challenges(self):
-        conn = sqlite3.connect("GoGreen.db")
-        cursor = conn.cursor()
-        try:
-            cursor.execute("DELETE FROM challenges")
-            cursor.execute(''' 
-                INSERT INTO challenges(challenge_name, description, points, completed) VALUES
-                    ("Use Reusable Bags", "Use reusable shopping bags 5 times", 10, FALSE),
-                    ("Take Care Of A Plant", "Water a Plant for a month", 20, FALSE),
-                    ("Lights Off", "Turn off unused lights 15 times", 5, FALSE),
-                    ("Avoid Plastic Bags", "Avoid using plastic bags for shopping 3 times", 10, FALSE),
-                    ("Recycle Plastic", "Put 20 plastic materials you find into recycle bins", 30, FALSE),
-                    ("Public Transport", "Use public transportation 5 times", 20, FALSE),
-                    ("Use Less Water", "Turn off running water 15 times", 10, FALSE),
-                    ("Plant A Plant", "Plant any type of plant and take care of it for a month", 50, FALSE),
-                    ("Use Reusable Bottles", "Do not purchase or use plastic bottles for a month", 5, FALSE),
-                    ("Don't Use Plastic", "Avoid the usage of any plastic materials for a week", 20, FALSE)
-            ''')
-            conn.commit()
-        finally:
-            cursor.close()
-            conn.close()
-
-    def on_enter(self):
-        # Prevent duplicate loading
-        if hasattr(self, 'content_added') and self.content_added:
-            return
-
-        grid = self.ids.content_area
-
-        conn = sqlite3.connect("GoGreen.db")
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-
-        try:
-            cursor.execute("SELECT challenge_name, description, points FROM challenges")
-            for row in cursor:
-                name = row["challenge_name"]
-                desc = row["description"]
-                points = row["points"]
-
-                btn = Button(
-                    text=f"{name}\n{points} pts",
-                    size_hint=(1, None),
-                    height=dp(100),
-                    background_normal="",
-                    background_color=(0, 0.6 + random() / 4, 0.6 + random() / 4, 1),
-                    color=(1, 1, 1, 1),
-                    font_size="12sp",
-                    bold=True
-                )
-                btn.bind(on_press=partial(self.open_challenge_detail, name, desc, points))
-                grid.add_widget(btn)
-
-            self.content_added = True
-
-        finally:
-            cursor.close()
-            conn.close()
-
-    def open_challenge_detail(self, name, description, points, instance):
-        detail_screen = self.manager.get_screen('challenge_detail')
-        detail_screen.set_challenge(name, description, points)
-        self.manager.current = 'challenge_detail'
-
-    def load_challenges(self):
-        from kivy.uix.label import Label
-        import sqlite3
-
-        conn = sqlite3.connect("GoGreen.db")
-        cursor = conn.cursor()
-        cursor.execute("SELECT challenge_name, description FROM challenges WHERE completed = 0")
-        challenges = cursor.fetchall()
-        cursor.close()
-        conn.close()
-
-        content_area = self.ids.content_area
-        content_area.clear_widgets()
-
-        for name, desc in challenges:
-            content_area.add_widget(
-                Label(text=f"[b]{name}[/b]\n{desc}", markup=True, size_hint_y=None, height=100))
-
-class ChallengeDetailScreen(Screen):
-    def set_challenge(self, name, description, points):
-        self.ids.challenge_name.text = name
-        self.ids.challenge_desc.text = description
-        self.ids.challenge_points.text = f"Points: {points}"
-        self.ids.challenge_progress.value = 0
-        self.event = Clock.schedule_interval(self.update_progress, 1 / 25)
-
-    def update_progress(self, dt):
-        pb = self.ids.challenge_progress
-        if pb.value < 100:
-            pb.value += 1
-        else:
-            Clock.unschedule(self.event)
-
-    def on_leave(self):
-        # Stop progress when leaving screen
-        if hasattr(self, 'event'):
-            Clock.unschedule(self.event)
-
+class TreeTracker(Screen):
+    pass
 
 # Challenges finish
+import sqlite3
+import sqlite3
+import random
+
+# Connect to the database
+conn = sqlite3.connect("GoGreen.db")
+cursor = conn.cursor()
+
+# Example user IDs (must exist in your users table)
+user_ids = [1, 2, 3]  # Replace with actual user IDs from your database
+
+# Sample tree descriptions
+descriptions = [
+    "Oak tree planted in community park",
+    "Maple tree near downtown",
+    "Pine tree in residential area",
+    "Fruit tree in school garden",
+    "Willow tree by the riverbank",
+    "Redwood tree in conservation area",
+    "Birch tree in urban plaza"
+]
+
+# Generate realistic coordinates within a city area (example: San Francisco)
+def generate_coordinates():
+    # Base coordinates (SF area)
+    base_lat = 37.7749
+    base_lon = -122.4194
+    # Random variation (about 10km radius)
+    lat_variation = random.uniform(-0.1, 0.1)
+    lon_variation = random.uniform(-0.1, 0.1)
+    return (base_lat + lat_variation, base_lon + lon_variation)
+
+# Insert 20 example trees
+for i in range(20):
+    user_id = random.choice(user_ids)
+    description = random.choice(descriptions)
+    lat, lon = generate_coordinates()
+    
+    cursor.execute('''
+        INSERT INTO trees (user_id, description, lat, lon)
+        VALUES (?, ?, ?, ?)
+    ''', (user_id, description, lat, lon))
+
+# Commit changes and close connection
+conn.commit()
+conn.close()
+
 
 # Map start
 class MapScreen(Screen):
@@ -373,21 +298,36 @@ class MapScreen(Screen):
         try:
             cursor.execute("SELECT lat, lon FROM trees")
             trees = cursor.fetchall()
-
+            print(f"Loaded {len(trees)} trees")  
+            
             for tree in trees:
                 marker = MapMarkerPopup(
-                    lat=tree['lat'],  
+                    lat=tree['lat'],
                     lon=tree['lon'],
-                    source='assets/tree_icon.png'  
+                    source='assets/tree_icon.png'
                 )
+                marker.size_hint = (None, None)
+                marker.size = (30, 30)
+                
+                content = BoxLayout(orientation='vertical', size=(200, 100))
+                content.add_widget(Button(
+                    text="Details", 
+                    size_hint_y=None,
+                    height=40
+                ))
+                marker.add_widget(content)
+                
                 mapview.add_marker(marker)
+            
+            if trees:
+                mapview.center_on(trees[0]['lat'], trees[0]['lon'])
+                mapview.zoom = 3
 
+        except Exception as e:
+            print(f"Error loading map: {e}")
         finally:
             cursor.close()
             conn.close()
-
-
-
 # Map finish
 
 # Profile start
@@ -478,12 +418,11 @@ class GoGreenApp(MDApp):
         Builder.load_file("screens/login_screen.kv")  # login .kv file
         Builder.load_file("screens/home_screen.kv")  # home .kv file
         Builder.load_file("screens/leaderboard_screen.kv")  # leaderboard .kv file
-        Builder.load_file("screens/challenges_screen.kv")  # challenges .kv file
+        Builder.load_file("screens/treetracker_screen.kv")  # challenges .kv file
         Builder.load_file("screens/map_screen.kv")  # map .kv file
         Builder.load_file("screens/profile_screen.kv")  # profile .kv file
-        Builder.load_file("screens/challenge_details_screen.kv")  # challenge details .kv file
 
-        ChallengesScreen().default_challenges()
+
         # need to add settings
         # need to add screens for solo challenges
 
@@ -497,8 +436,7 @@ class GoGreenApp(MDApp):
         sm.add_widget(LeaderboardScreen(name="leaderboard"))
         sm.add_widget(ProfileScreen(name="profile"))
         sm.add_widget(MapScreen(name="map"))
-        sm.add_widget(ChallengesScreen(name="challenges"))
-        sm.add_widget(ChallengeDetailScreen(name="challenge_detail"))
+        sm.add_widget(TreeTracker(name="treetracker"))
 
         sm.current = "welcome"  # Start with WelcomeScreen
         return sm
@@ -509,8 +447,8 @@ class GoGreenApp(MDApp):
     def home_page(self):
         self.root.current = "homepage"
 
-    def challenges_page(self):
-        self.root.current = "challenges"
+    def treetracker_page(self):
+        self.root.current = "treetracker"
 
     def map_page(self):
         self.root.current = "map"
@@ -518,6 +456,9 @@ class GoGreenApp(MDApp):
     def profile_page(self):
         self.root.current = "profile"
 
+
+if __name__ == "__main__":
+    GoGreenApp().run()
 
 if __name__ == "__main__":
     GoGreenApp().run()
