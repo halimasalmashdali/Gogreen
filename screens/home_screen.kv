@@ -1,35 +1,48 @@
 <HomepageScreen>:
-    name: "homepage"
-    BoxLayout:
-        orientation: 'vertical'
-        spacing: 0
+    FloatLayout:
+        Image:
+            source: "assets/photos/decor.png"
+            size_hint: None, None
+            size: 180, 180
+            pos: 0, self.parent.height - 150
 
-        # Main content (takes available space)
-        MDBoxLayout:
-            Button:
-                text: "challenge"
-                size_hint_y: 0.7
-            Button:
-                text: "challenge"
-                size_hint_y: 0.7
-            Button:
-                text: "challenge"
-                size_hint_y: 0.7
+        Image:
+            source: "assets/photos/decor.png"
+            size_hint: None, None
+            size: 180, 180
+            pos: self.parent.width - 180, -30
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: 180
+                    origin: self.center
+            canvas.after:
+                PopMatrix
 
-        Widget:  # Spacer
-            size_hint_y: 0.5
-
-        MDBoxLayout:
-            orientation: "vertical"
-            Button:
-                text: "news"
-                size_hint_y: 0.4
-            Button:
-                text: "news"
-                size_hint_y: 0.4
-            Button:
-                text: "news"
-                size_hint_y: 0.4
+        Widget:
+            size_hint_y:0.05
+        ScrollView:
+            do_default_tab: True
+            GridLayout:
+                id: news
+                cols: 1  
+                spacing: dp(20)
+                padding: dp(5)
+                size_hint_y: None
+                height: self.minimum_height
+                
+                Button:
+                    text: "news"
+                    size_hint_y: None
+                    height: dp(100)
+                Button:
+                    text: "news"
+                    size_hint_y: None
+                    height: dp(100)
+                Button:
+                    text: "news"
+                    size_hint_y: None
+                    height: dp(100)
 
         # Custom bottom bar - NO FAB SPACE
         MDBoxLayout:
@@ -48,8 +61,8 @@
                 size_hint_x: 0.5
 
             MDIconButton:
-                icon: "check-circle"
-                on_release: app.challenges_page()
+                icon: "forest"
+                on_release: app.treetracker_page()
                 theme_text_color: "Custom"
                 text_color: "white"
 
