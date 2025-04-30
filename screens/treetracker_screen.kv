@@ -1,14 +1,15 @@
-<TreeTracker>:
+<TreeTrackerScreen>:
     name: 'treetracker'
-
     FloatLayout:
+
         Image:
             source: "assets/photos/decor.png"
             size_hint: None, None
             size: 180, 180
             pos: 0, self.parent.height - 150
 
-        Widget:  # Bottom-right rotated decor
+        Image:
+            source: "assets/photos/decor.png"
             size_hint: None, None
             size: 180, 180
             pos: self.parent.width - 180, -30
@@ -19,56 +20,152 @@
                     origin: self.center
             canvas.after:
                 PopMatrix
-            Image:
-                source: "assets/photos/decor.png"
-                size: 180, 180
-                pos: self.pos
 
-        MDBoxLayout:
-            size_hint_y: None
-            height: dp(56)
-            md_bg_color: app.theme_cls.primary_color
-            padding: dp(10)
-            pos_hint: {"bottom": 1}  # Changed from "top" to "bottom"
-            
-            MDIconButton:
-                icon: "home"
-                on_release: root.manager.current = "homepage"
-                theme_text_color: "Custom"
-                text_color: "white"
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                padding: 20
+                spacing: 20
 
-            Widget:
-                size_hint_x: 0.5
+                Label:
+                    text: "[size=24][color=000000]Register your[/color][/size]"
+                    markup: True
+                    halign: 'right'
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                    font_name: "assets/Poppins-SemiBold.ttf"
 
-            MDIconButton:
-                icon: "forest"
-                theme_text_color: "Custom"
-                text_color: "white"
+                Label:
+                    text: "[size=48][b][color=528265]Tree[/color][/b][/size]"
+                    markup: True
+                    halign: 'center'
+                    valign: 'middle'
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                    font_name: "assets/Poppins-SemiBold.ttf"
 
-            Widget:
-                size_hint_x: 0.5
+                # Input fields
+                TextInput:
+                    id: name
+                    hint_text: "Name"
+                    hint_text_color: 0.5, 0.5, 0.5, 1
+                    foreground_color: 0.5, 0.5, 0.5, 1
+                    font_name: "assets/Poppins-SemiBold.ttf"
+                    font_size: 16
+                    size_hint: 0.9, None
+                    height: 45
+                    pos_hint: {"center_x": 0.5}
+                    background_normal: ''
+                    background_color: 1, 1, 1, 1
+                    padding: 10
+                    canvas.before:
+                        Color:
+                            rgba: 0, 0, 0, 1
+                        Line:
+                            width: 1
+                            rounded_rectangle: (*self.pos, *self.size, 20)
 
-            MDIconButton:
-                icon: "trophy"
-                on_release: root.manager.current = "leaderboard"
-                theme_text_color: "Custom"
-                text_color: "white"
+                TextInput:
+                    id: desc
+                    hint_text: "Description"
+                    hint_text_color: 0.5, 0.5, 0.5, 1
+                    foreground_color: 0.5, 0.5, 0.5, 1
+                    font_name: "assets/Poppins-SemiBold.ttf"
+                    font_size: 16
+                    size_hint: 0.9, None
+                    height: 45
+                    pos_hint: {"center_x": 0.5}
+                    background_normal: ''
+                    background_color: 1, 1, 1, 1
+                    padding: 10
+                    canvas.before:
+                        Color:
+                            rgba: 0, 0, 0, 1
+                        Line:
+                            width: 1
+                            rounded_rectangle: (*self.pos, *self.size, 20)
 
-            Widget:
-                size_hint_x: 0.5
+                TextInput:
+                    id: password
+                    hint_text: "Password"
+                    password: True
+                    hint_text_color: 0.5, 0.5, 0.5, 1
+                    foreground_color: 0.5, 0.5, 0.5, 1
+                    font_name: "assets/Poppins-SemiBold.ttf"
+                    font_size: 16
+                    size_hint: 0.9, None
+                    height: 45
+                    pos_hint: {"center_x": 0.5}
+                    background_normal: ''
+                    background_color: 1, 1, 1, 1
+                    padding: 10
+                    canvas.before:
+                        Color:
+                            rgba: 0, 0, 0, 1
+                        Line:
+                            width: 1
+                            rounded_rectangle: (*self.pos, *self.size, 20)
 
-            MDIconButton:
-                icon: "map"
-                on_release: root.manager.current = "map"
-                theme_text_color: "Custom"
-                text_color: "white"
+                TextInput:
+                    id: confirm_password
+                    hint_text: "Confirm Password"
+                    password: True
+                    hint_text_color: 0.5, 0.5, 0.5, 1
+                    foreground_color: 0.5, 0.5, 0.5, 1
+                    font_name: "assets/Poppins-SemiBold.ttf"
+                    font_size: 16
+                    size_hint: 0.9, None
+                    height: 45
+                    pos_hint: {"center_x": 0.5}
+                    background_normal: ''
+                    background_color: 1, 1, 1, 1
+                    padding: 10
+                    canvas.before:
+                        Color:
+                            rgba: 0, 0, 0, 1
+                        Line:
+                            width: 1
+                            rounded_rectangle: (*self.pos, *self.size, 20)
 
-            Widget:
-                size_hint_x: 0.5
+                TextInput:
+                    id: nickname
+                    hint_text: "Nickname"
+                    hint_text_color: 0.5, 0.5, 0.5, 1
+                    foreground_color: 0.5, 0.5, 0.5, 1
+                    font_name: "assets/Poppins-SemiBold.ttf"
+                    font_size: 16
+                    size_hint: 0.9, None
+                    height: 45
+                    pos_hint: {"center_x": 0.5}
+                    background_normal: ''
+                    background_color: 1, 1, 1, 1
+                    padding: 10
+                    canvas.before:
+                        Color:
+                            rgba: 0, 0, 0, 1
+                        Line:
+                            width: 1
+                            rounded_rectangle: (*self.pos, *self.size, 20)
 
-            MDIconButton:
-                icon: "account"
-                on_release: root.manager.current = "profile"
-                theme_text_color: "Custom"
-    
-                text_color: "white"
+
+                Button:
+                    text: "Register"
+                    size_hint: 0.9, None
+                    height: 45
+                    pos_hint: {"center_x": 0.5}
+                    background_normal: ''
+                    background_color: 0, 0.6, 0, 1
+                    color: 1, 1, 1, 1
+                    font_size: "16sp"
+                    font_name: "assets/Poppins-SemiBold.ttf"
+                    on_press: root.register()
+
+                Label:
+                    text: "[color=434343]Already have an account?[/color] [ref=login][color=2196F3]Sign In[/color][/ref]"
+                    markup: True
+                    font_size: "12sp"
+                    pos_hint: {"center_x": 0.5}
+                    font_name: "assets/Poppins-SemiBold.ttf"
+                    on_ref_press:
+                        app.root.current = 'login'

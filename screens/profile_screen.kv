@@ -46,16 +46,6 @@
                     text_size: self.size
                     size_hint: 1, 1
 
-        # Scrollable challenge section
-        ScrollView:
-            MDBoxLayout:
-                id: challenges_container
-                orientation: "horizontal"
-                padding: dp(10)
-                spacing: dp(10)
-                size_hint_y: 0.9
-                height: dp(100)
-                adaptive_width: True
 
         # Bottom navigation bar
         MDBoxLayout:
@@ -75,8 +65,8 @@
                 size_hint_x: 0.5
 
             MDIconButton:
-                icon: "check-circle"
-                on_release: root.manager.current = "challenges"
+                icon: "forest"
+                on_release: app.treetracker_page()
                 theme_text_color: "Custom"
                 text_color: "white"
 

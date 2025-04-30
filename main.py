@@ -52,21 +52,12 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                     password TEXT,
                     role TEXT)''')
 
-# Drop the 'points' table (if needed) and create it
-cursor.execute('''DROP TABLE IF EXISTS points''')  # This drops the table, make sure you don't need the data
-cursor.execute('''CREATE TABLE IF NOT EXISTS points (
-                    tree_id INTEGER,
-                    user_id INTEGER,
-                    points INTEGER DEFAULT 0,
-                    FOREIGN KEY (tree_id) REFERENCES trees(tree_id),
-                    FOREIGN KEY (user_id) REFERENCES users(user_id))''')
-
 # Create 'trees' table
 cursor.execute('''DROP TABLE IF EXISTS trees''')
 cursor.execute('''CREATE TABLE IF NOT EXISTS trees (
                     tree_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id INTEGER,
-                    description TEXT,
+                    desc TEXT,
                     lat REAL,
                     lon REAL,
                     FOREIGN KEY(user_id) REFERENCES users(user_id))''')
@@ -91,25 +82,24 @@ class WelcomeScreen(Screen):
 # Leaderboard start
 class LeaderboardRow(BoxLayout):
     nickname = StringProperty()
-    points = NumericProperty()
+    trees_planted = NumericProperty()
     bg_color = ListProperty([1, 1, 1, 1])
 
 
 class LeaderboardScreen(Screen):
-    pass
-''' def on_enter(self):
+    def on_enter(self):
         self.load_data()
 
     def load_data(self):
         conn = sqlite3.connect('GoGreen.db')
         cursor = conn.cursor()
-        cursor.execute(
-                SELECT u.nickname, COALESCE(SUM(p.points), 0) as total_points
-                FROM users u
-                LEFT JOIN points p ON u.user_id = p.user_id  -- Corrected the field to user_id
-                GROUP BY u.user_id  -- Corrected the field to user_id
-                ORDER BY total_points DESC )
-
+        cursor.execute('''
+            SELECT u.nickname, COUNT(t.tree_id) as total_trees
+            FROM users u
+            LEFT JOIN trees t ON u.user_id = t.user_id
+            GROUP BY u.user_id
+            ORDER BY total_trees DESC
+        ''')
         data = cursor.fetchall()
         conn.close()
 
@@ -117,12 +107,12 @@ class LeaderboardScreen(Screen):
         self.ids.top3_box.clear_widgets()
 
         # Top 3 display with colors
-        top3_order = [1, 0, 2]  # Visually reorder to 2nd - 1st - 3rd
+        top3_order = [1, 0, 2]  # Show 2nd, then 1st, then 3rd for visual effect
         top3_colors = [(1, 0.84, 0, 1), (0.75, 0.75, 0.75, 1), (0.8, 0.5, 0.2, 1)]
         top3_cards = []
 
         for i in range(min(3, len(data))):
-            nickname, points = data[i]
+            nickname, trees = data[i]
             card = MDCard(
                 orientation="vertical",
                 size_hint=(None, None),
@@ -131,8 +121,8 @@ class LeaderboardScreen(Screen):
                 md_bg_color=top3_colors[i],
                 radius=[12],
             )
-            card.add_widget(MDLabel(text=nickname, halign="center", theme_text_color="Primary", ))
-            card.add_widget(MDLabel(text=f"{points} pts", halign="center", theme_text_color="Secondary"))
+            card.add_widget(MDLabel(text=nickname, halign="center", theme_text_color="Primary"))
+            card.add_widget(MDLabel(text=f"{trees} trees", halign="center", theme_text_color="Secondary"))
             top3_cards.append(card)
 
         for i, idx in enumerate(top3_order):
@@ -141,14 +131,14 @@ class LeaderboardScreen(Screen):
                 if i < len(top3_order) - 1:
                     self.ids.top3_box.add_widget(Widget(size_hint_x=None, width=dp(2)))
 
-        # Remaining users (4th place onwards)
-        for i, (nickname, points) in enumerate(data[3:], start=4):
+        # Remaining users
+        for i, (nickname, trees) in enumerate(data[3:], start=4):
             row = LeaderboardRow(
                 nickname=nickname,
-                points=points,
+                trees_planted=trees,
                 bg_color=(0.8, 1, 0.8, 1) if App.get_running_app().current_user_nickname == nickname else (1, 1, 1, 1)
             )
-            self.ids.leaderboard_list.add_widget(row) '''
+            self.ids.leaderboard_list.add_widget(row)
 
 
 # Leaderboard finish
@@ -183,8 +173,6 @@ class RegisterScreen(Screen):
         try:
             cursor.execute("INSERT INTO users (full_name, nickname, email, password) VALUES (?, ?, ?, ?)",
                            (full_name, nickname, email, password))
-            conn.commit()
-            cursor.execute("INSERT INTO points (points) VALUES (0)")
             conn.commit()
             print("User registered successfully!")
 
@@ -235,7 +223,7 @@ import sqlite3
 from kivymd.uix.card import MDCard
 from kivymd.uix.label import MDLabel
 
-class TreeTracker(Screen):
+class TreeTrackerScreen(Screen):
     pass
 
 # Challenges finish
@@ -248,7 +236,7 @@ conn = sqlite3.connect("GoGreen.db")
 cursor = conn.cursor()
 
 # Example user IDs (must exist in your users table)
-user_ids = [1, 2, 3]  # Replace with actual user IDs from your database
+user_ids = [1, 2]  # Replace with actual user IDs from your database
 
 # Sample tree descriptions
 descriptions = [
@@ -272,15 +260,21 @@ def generate_coordinates():
     return (base_lat + lat_variation, base_lon + lon_variation)
 
 # Insert 20 example trees
-for i in range(20):
-    user_id = random.choice(user_ids)
-    description = random.choice(descriptions)
-    lat, lon = generate_coordinates()
-    
-    cursor.execute('''
-        INSERT INTO trees (user_id, description, lat, lon)
-        VALUES (?, ?, ?, ?)
-    ''', (user_id, description, lat, lon))
+cursor.execute("SELECT COUNT(*) FROM trees")
+tree_count = cursor.fetchone()[0]
+
+if tree_count == 0:
+    # Insert 20 example trees
+    for i in range(20):
+        user_id = random.choice(user_ids)
+        description = random.choice(descriptions)
+        lat, lon = generate_coordinates()
+
+        cursor.execute('''
+            INSERT INTO trees (user_id, desc, lat, lon)
+            VALUES (?, ?, ?, ?)
+        ''', (user_id, description, lat, lon))
+
 
 # Commit changes and close connection
 conn.commit()
@@ -304,7 +298,7 @@ class MapScreen(Screen):
                 marker = MapMarkerPopup(
                     lat=tree['lat'],
                     lon=tree['lon'],
-                    source='assets/tree_icon.png'
+                    source='assets/photos/tree_icon.png'
                 )
                 marker.size_hint = (None, None)
                 marker.size = (30, 30)
@@ -333,76 +327,47 @@ class MapScreen(Screen):
 # Profile start
 class ProfileScreen(Screen):
     pass
-'''    def on_enter(self):
-        self.load_user_challenges()
-
-    # ProfileScreen load_user_challenges method
-    def load_user_challenges(self):
-        nickname = App.get_running_app().current_user_nickname
-        conn = sqlite3.connect("GoGreen.db")
-        cursor = conn.cursor()
-
-        cursor.execute(""" 
-            SELECT c.challenge_name, c.description, p.points
-            FROM users u
-            JOIN points p ON u.user_id = p.user_id  -- Corrected join condition
-            JOIN challenges c ON p.challenge_id = c.challenge_id
-            WHERE u.nickname = ? 
-        """, (nickname,))
-
-        data = cursor.fetchall()
-        conn.close()
-
-        container = self.ids.challenges_container
-        container.clear_widgets()
-
-        if not data:
-            # Create a BoxLayout to ensure horizontal alignment
-            no_challenges_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(140))
-
-            # Create MDLabel for "No active challenges"
-            label = MDLabel(
-                text="No active challenges",
-                halign="center",
-                theme_text_color="Custom",
-                text_color=(0.5, 0.5, 0.5, 1),
-                font_style="Body1",
-                size_hint=(None, None),
-                size=(dp(200), dp(40)),
-                pos_hint={"center_x": 0.5, "center_y": 0.5}
-            )
-
-            # Add label to the layout and layout to the container
-            no_challenges_layout.add_widget(label)
-            container.add_widget(no_challenges_layout)
-        else:
-            # Add challenges to the container as usual
-            for name, description, points in data:
-                card = MDCard(
-                    orientation="vertical",
-                    padding=dp(10),
-                    size_hint=(None, None),
-                    size=(dp(120), dp(100)),
-                    radius=[12],
-                    md_bg_color=(0.7, 1, 0.7, 1),
-                    ripple_behavior=True,
-                )
-                card.bind(on_release=partial(self.open_challenge, name, description, points))
-
-                card.add_widget(MDLabel(text=name, bold=True, font_style="H6", halign="center"))
-                card.add_widget(MDLabel(text=f"{points} pts", theme_text_color="Secondary", halign="center"))
-                container.add_widget(card)
-
-    def open_challenge(self, name, description, points, instance):
-        detail_screen = self.manager.get_screen("challenge_detail")
-        detail_screen.set_challenge(name, description, points)
-        self.manager.current = "challenge_detail"
-
-    def congs(self, instance):
-        self.manager.current = "settings"'''
-
 
 # Profile finish
+
+
+#Tree registration start
+
+class TreeRegisterScreen(Screen):
+    def register_tree(self):
+        name = self.ids.name.text
+        species = self.ids.species.text
+        desc = self.ids.desc.text
+        user_id = self.ids.user_id.text
+
+        if not name or not species or not desc or not user_id:
+            print("All fields are required!")
+            return
+
+        try:
+            user_id = int(user_id)
+        except ValueError:
+            print("User ID must be numbers!")
+            return
+
+        conn = sqlite3.connect("Gogreen.db")
+        cursor = conn.cursor()
+        try:
+            cursor.execute("INSERT INTO trees (name, species, desc, user_id) VALUES (?, ?, ?, ?)",
+                           (name, species, desc, user_id))
+            conn.commit()
+            print("Tree registered successfully!")
+
+            # Redirect to homepage or trees list
+            self.manager.current = "homepage"
+
+        except sqlite3.Error as e:
+            print("Database error:", e)
+        finally:
+            conn.close()
+
+
+# Tree registration end
 
 
 # MAIN APP
@@ -437,13 +402,16 @@ class GoGreenApp(MDApp):
         sm.add_widget(LeaderboardScreen(name="leaderboard"))
         sm.add_widget(ProfileScreen(name="profile"))
         sm.add_widget(MapScreen(name="map"))
-        sm.add_widget(TreeTracker(name="treetracker"))
+        sm.add_widget(TreeTrackerScreen(name="treetracker"))
 
         sm.current = "welcome"  # Start with WelcomeScreen
         return sm
 
     def leaderboard_page(self):
         self.root.current = "leaderboard"
+
+    def tree_reg_page(self):
+        self.root.current = "tree_reg"
 
     def home_page(self):
         self.root.current = "homepage"

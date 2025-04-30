@@ -19,7 +19,7 @@
         font_name: "assets/Poppins-SemiBold.ttf"
 
     Label:
-        text: str(root.points)
+        text: str(root.trees_planted)
         font_size: "16sp"
         halign: "right"
         color: (0, 0, 0, 1)
@@ -110,8 +110,8 @@
             size_hint_x: 0.5
 
         MDIconButton:
-            icon: "check-circle"
-            on_release: root.manager.current = "challenges"
+            icon: "forest"
+            on_release: app.treetracker_page()
             theme_text_color: "Custom"
             text_color: "white"
 
