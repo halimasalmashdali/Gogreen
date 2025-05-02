@@ -53,7 +53,6 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                     role TEXT)''')
 
 # Create 'trees' table
-cursor.execute('''DROP TABLE IF EXISTS trees''')
 cursor.execute('''CREATE TABLE IF NOT EXISTS trees (
                     tree_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id INTEGER,
