@@ -57,10 +57,14 @@ cursor.execute('''DROP TABLE IF EXISTS trees''')
 cursor.execute('''CREATE TABLE IF NOT EXISTS trees (
                     tree_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id INTEGER,
+                    name TEXT,
+                    species TEXT,
                     desc TEXT,
                     lat REAL,
                     lon REAL,
-                    FOREIGN KEY(user_id) REFERENCES users(user_id))''')
+                    FOREIGN KEY(user_id) REFERENCES users(user_id)
+)
+''')
 
 # Enable foreign key constraints (ensure that foreign keys work)
 cursor.execute('PRAGMA foreign_keys = ON')
@@ -223,62 +227,60 @@ import sqlite3
 from kivymd.uix.card import MDCard
 from kivymd.uix.label import MDLabel
 
-class TreeTrackerScreen(Screen):
-    pass
 
 # Challenges finish
 import sqlite3
 import sqlite3
 import random
-
-# Connect to the database
-conn = sqlite3.connect("GoGreen.db")
-cursor = conn.cursor()
-
-# Example user IDs (must exist in your users table)
-user_ids = [1, 2]  # Replace with actual user IDs from your database
-
-# Sample tree descriptions
-descriptions = [
-    "Oak tree planted in community park",
-    "Maple tree near downtown",
-    "Pine tree in residential area",
-    "Fruit tree in school garden",
-    "Willow tree by the riverbank",
-    "Redwood tree in conservation area",
-    "Birch tree in urban plaza"
-]
-
-# Generate realistic coordinates within a city area (example: San Francisco)
-def generate_coordinates():
-    # Base coordinates (SF area)
-    base_lat = 37.7749
-    base_lon = -122.4194
-    # Random variation (about 10km radius)
-    lat_variation = random.uniform(-0.1, 0.1)
-    lon_variation = random.uniform(-0.1, 0.1)
-    return (base_lat + lat_variation, base_lon + lon_variation)
-
-# Insert 20 example trees
-cursor.execute("SELECT COUNT(*) FROM trees")
-tree_count = cursor.fetchone()[0]
-
-if tree_count == 0:
-    # Insert 20 example trees
-    for i in range(20):
-        user_id = random.choice(user_ids)
-        description = random.choice(descriptions)
-        lat, lon = generate_coordinates()
-
-        cursor.execute('''
-            INSERT INTO trees (user_id, desc, lat, lon)
-            VALUES (?, ?, ?, ?)
-        ''', (user_id, description, lat, lon))
-
-
-# Commit changes and close connection
-conn.commit()
-conn.close()
+#
+# # Connect to the database
+# conn = sqlite3.connect("GoGreen.db")
+# cursor = conn.cursor()
+#
+# # Example user IDs (must exist in your users table)
+# user_ids = [1, 2]  # Replace with actual user IDs from your database
+#
+# # Sample tree descriptions
+# descriptions = [
+#     "Oak tree planted in community park",
+#     "Maple tree near downtown",
+#     "Pine tree in residential area",
+#     "Fruit tree in school garden",
+#     "Willow tree by the riverbank",
+#     "Redwood tree in conservation area",
+#     "Birch tree in urban plaza"
+# ]
+#
+# # Generate realistic coordinates within a city area (example: San Francisco)
+# def generate_coordinates():
+#     # Base coordinates (SF area)
+#     base_lat = 37.7749
+#     base_lon = -122.4194
+#     # Random variation (about 10km radius)
+#     lat_variation = random.uniform(-0.1, 0.1)
+#     lon_variation = random.uniform(-0.1, 0.1)
+#     return (base_lat + lat_variation, base_lon + lon_variation)
+#
+# # Insert 20 example trees
+# cursor.execute("SELECT COUNT(*) FROM trees")
+# tree_count = cursor.fetchone()[0]
+#
+# if tree_count == 0:
+#     # Insert 20 example trees
+#     for i in range(20):
+#         user_id = random.choice(user_ids)
+#         description = random.choice(descriptions)
+#         lat, lon = generate_coordinates()
+#
+#         cursor.execute('''
+#             INSERT INTO trees (user_id, desc, lat, lon)
+#             VALUES (?, ?, ?, ?)
+#         ''', (user_id, description, lat, lon))
+#
+#
+# # Commit changes and close connection
+# conn.commit()
+# conn.close()
 
 
 # Map start
@@ -332,40 +334,51 @@ class ProfileScreen(Screen):
 
 
 #Tree registration start
-
-class TreeRegisterScreen(Screen):
+class TreeTrackerScreen(Screen):
     def register_tree(self):
         name = self.ids.name.text
-        species = self.ids.species.text
         desc = self.ids.desc.text
-        user_id = self.ids.user_id.text
+        species = self.ids.specie.text
+        lat = self.ids.latitude.text
+        lon = self.ids.longitude.text
 
-        if not name or not species or not desc or not user_id:
+        if not name or not species or not desc or not lat or not lon:
             print("All fields are required!")
             return
 
         try:
-            user_id = int(user_id)
+            lat = float(lat)
+            lon = float(lon)
         except ValueError:
-            print("User ID must be numbers!")
+            print("Latitude and Longitude must be valid numbers!")
             return
 
-        conn = sqlite3.connect("Gogreen.db")
+        user_nickname = App.get_running_app().current_user_nickname
+        conn = sqlite3.connect("GoGreen.db")
         cursor = conn.cursor()
+        cursor.execute("SELECT user_id FROM users WHERE nickname = ?", (user_nickname,))
+        result = cursor.fetchone()
+        if result:
+            user_id = result[0]
+        else:
+            print("User not found.")
+            return
+
         try:
-            cursor.execute("INSERT INTO trees (name, species, desc, user_id) VALUES (?, ?, ?, ?)",
-                           (name, species, desc, user_id))
+            cursor.execute(
+                "INSERT INTO trees (user_id, name, species, desc, lat, lon) VALUES (?, ?, ?, ?, ?, ?)",
+                (user_id, name, species, desc, lat, lon),
+            )
             conn.commit()
             print("Tree registered successfully!")
 
-            # Redirect to homepage or trees list
+            # Redirect to homepage
             self.manager.current = "homepage"
 
-        except sqlite3.Error as e:
-            print("Database error:", e)
+        except Exception as e:
+            print(f"Error inserting tree: {e}")
         finally:
             conn.close()
-
 
 # Tree registration end
 

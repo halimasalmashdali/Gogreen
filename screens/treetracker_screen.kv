@@ -21,41 +21,85 @@
             canvas.after:
                 PopMatrix
 
-            BoxLayout:
-                orientation: 'vertical'
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 20
+            size_hint: 0.9, None
+            height: self.minimum_height
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+            Label:
+                text: "[size=24][color=000000]Register your[/color][/size]"
+                markup: True
+                halign: 'right'
                 size_hint_y: None
-                height: self.minimum_height
-                padding: 20
-                spacing: 20
+                height: self.texture_size[1]
+                font_name: "assets/Poppins-SemiBold.ttf"
 
-                Label:
-                    text: "[size=24][color=000000]Register your[/color][/size]"
-                    markup: True
-                    halign: 'right'
-                    size_hint_y: None
-                    height: self.texture_size[1]
-                    font_name: "assets/Poppins-SemiBold.ttf"
-
-                Label:
-                    text: "[size=48][b][color=528265]Tree[/color][/b][/size]"
-                    markup: True
-                    halign: 'center'
-                    valign: 'middle'
-                    size_hint_y: None
-                    height: self.texture_size[1]
-                    font_name: "assets/Poppins-SemiBold.ttf"
+            Label:
+                text: "[size=48][b][color=528265]Tree[/color][/b][/size]"
+                markup: True
+                halign: 'center'
+                valign: 'middle'
+                size_hint_y: None
+                height: self.texture_size[1]
+                font_name: "assets/Poppins-SemiBold.ttf"
 
                 # Input fields
+            TextInput:
+                id: name
+                hint_text: "Name"
+                hint_text_color: 0.5, 0.5, 0.5, 1
+                foreground_color: 0.5, 0.5, 0.5, 1
+                font_name: "assets/Poppins-SemiBold.ttf"
+                font_size: 16
+                size_hint: 0.9, None
+                height: 45
+                pos_hint: {"center_x": 0.5}
+                background_normal: ''
+                background_color: 1, 1, 1, 1
+                padding: 10
+                canvas.before:
+                    Color:
+                        rgba: 0, 0, 0, 1
+                    Line:
+                        width: 1
+                        rounded_rectangle: (*self.pos, *self.size, 20)
+
+            TextInput:
+                id: desc
+                hint_text: "Description"
+                hint_text_color: 0.5, 0.5, 0.5, 1
+                foreground_color: 0.5, 0.5, 0.5, 1
+                font_name: "assets/Poppins-SemiBold.ttf"
+                font_size: 16
+                size_hint: 0.9, None
+                height: 45
+                pos_hint: {"center_x": 0.5}
+                background_normal: ''
+                background_color: 1, 1, 1, 1
+                padding: 10
+                canvas.before:
+                    Color:
+                        rgba: 0, 0, 0, 1
+                    Line:
+                        width: 1
+                        rounded_rectangle: (*self.pos, *self.size, 20)
+
+            BoxLayout:
+                orientation: 'horizontal'
+                spacing: 10
+                size_hint: 0.9, None
+                height: 45
+                pos_hint: {"center_x": 0.5}
+
                 TextInput:
-                    id: name
-                    hint_text: "Name"
+                    id: latitude
+                    hint_text: "LAT"
                     hint_text_color: 0.5, 0.5, 0.5, 1
                     foreground_color: 0.5, 0.5, 0.5, 1
                     font_name: "assets/Poppins-SemiBold.ttf"
                     font_size: 16
-                    size_hint: 0.9, None
-                    height: 45
-                    pos_hint: {"center_x": 0.5}
                     background_normal: ''
                     background_color: 1, 1, 1, 1
                     padding: 10
@@ -67,15 +111,12 @@
                             rounded_rectangle: (*self.pos, *self.size, 20)
 
                 TextInput:
-                    id: desc
-                    hint_text: "Description"
+                    id: longitude
+                    hint_text: "LAN"
                     hint_text_color: 0.5, 0.5, 0.5, 1
                     foreground_color: 0.5, 0.5, 0.5, 1
                     font_name: "assets/Poppins-SemiBold.ttf"
                     font_size: 16
-                    size_hint: 0.9, None
-                    height: 45
-                    pos_hint: {"center_x": 0.5}
                     background_normal: ''
                     background_color: 1, 1, 1, 1
                     padding: 10
@@ -86,86 +127,87 @@
                             width: 1
                             rounded_rectangle: (*self.pos, *self.size, 20)
 
-                TextInput:
-                    id: password
-                    hint_text: "Password"
-                    password: True
-                    hint_text_color: 0.5, 0.5, 0.5, 1
-                    foreground_color: 0.5, 0.5, 0.5, 1
-                    font_name: "assets/Poppins-SemiBold.ttf"
-                    font_size: 16
-                    size_hint: 0.9, None
-                    height: 45
-                    pos_hint: {"center_x": 0.5}
-                    background_normal: ''
-                    background_color: 1, 1, 1, 1
-                    padding: 10
-                    canvas.before:
-                        Color:
-                            rgba: 0, 0, 0, 1
-                        Line:
-                            width: 1
-                            rounded_rectangle: (*self.pos, *self.size, 20)
-
-                TextInput:
-                    id: confirm_password
-                    hint_text: "Confirm Password"
-                    password: True
-                    hint_text_color: 0.5, 0.5, 0.5, 1
-                    foreground_color: 0.5, 0.5, 0.5, 1
-                    font_name: "assets/Poppins-SemiBold.ttf"
-                    font_size: 16
-                    size_hint: 0.9, None
-                    height: 45
-                    pos_hint: {"center_x": 0.5}
-                    background_normal: ''
-                    background_color: 1, 1, 1, 1
-                    padding: 10
-                    canvas.before:
-                        Color:
-                            rgba: 0, 0, 0, 1
-                        Line:
-                            width: 1
-                            rounded_rectangle: (*self.pos, *self.size, 20)
-
-                TextInput:
-                    id: nickname
-                    hint_text: "Nickname"
-                    hint_text_color: 0.5, 0.5, 0.5, 1
-                    foreground_color: 0.5, 0.5, 0.5, 1
-                    font_name: "assets/Poppins-SemiBold.ttf"
-                    font_size: 16
-                    size_hint: 0.9, None
-                    height: 45
-                    pos_hint: {"center_x": 0.5}
-                    background_normal: ''
-                    background_color: 1, 1, 1, 1
-                    padding: 10
-                    canvas.before:
-                        Color:
-                            rgba: 0, 0, 0, 1
-                        Line:
-                            width: 1
-                            rounded_rectangle: (*self.pos, *self.size, 20)
+            TextInput:
+                id: specie
+                hint_text: "Specie"
+                hint_text_color: 0.5, 0.5, 0.5, 1
+                foreground_color: 0.5, 0.5, 0.5, 1
+                font_name: "assets/Poppins-SemiBold.ttf"
+                font_size: 16
+                size_hint: 0.9, None
+                height: 45
+                pos_hint: {"center_x": 0.5}
+                background_normal: ''
+                background_color: 1, 1, 1, 1
+                padding: 10
+                canvas.before:
+                    Color:
+                        rgba: 0, 0, 0, 1
+                    Line:
+                        width: 1
+                        rounded_rectangle: (*self.pos, *self.size, 20)
 
 
-                Button:
-                    text: "Register"
-                    size_hint: 0.9, None
-                    height: 45
-                    pos_hint: {"center_x": 0.5}
-                    background_normal: ''
-                    background_color: 0, 0.6, 0, 1
-                    color: 1, 1, 1, 1
-                    font_size: "16sp"
-                    font_name: "assets/Poppins-SemiBold.ttf"
-                    on_press: root.register()
+            Button:
+                text: "Register"
+                size_hint: 0.9, None
+                height: 45
+                pos_hint: {"center_x": 0.5}
+                background_normal: ''
+                background_color: 0, 0.6, 0, 1
+                color: 1, 1, 1, 1
+                font_size: "16sp"
+                font_name: "assets/Poppins-SemiBold.ttf"
+                on_press: root.register_tree()
 
-                Label:
-                    text: "[color=434343]Already have an account?[/color] [ref=login][color=2196F3]Sign In[/color][/ref]"
-                    markup: True
-                    font_size: "12sp"
-                    pos_hint: {"center_x": 0.5}
-                    font_name: "assets/Poppins-SemiBold.ttf"
-                    on_ref_press:
-                        app.root.current = 'login'
+
+
+        # Custom bottom bar - NO FAB SPACE
+        MDBoxLayout:
+            size_hint_y: None
+            height: dp(56)
+            md_bg_color: app.theme_cls.primary_color
+            padding: dp(10)
+
+            MDIconButton:
+                icon: "home"
+                on_release: app.home_page()
+                theme_text_color: "Custom"
+                text_color: "white"
+
+            Widget:  # Spacer
+                size_hint_x: 0.5
+
+            MDIconButton:
+                icon: "forest"
+                on_release: app.treetracker_page()
+                theme_text_color: "Custom"
+                text_color: "white"
+
+            Widget:  # Spacer
+                size_hint_x: 0.5
+
+            MDIconButton:
+                icon: "trophy"
+                on_release: app.leaderboard_page()
+                theme_text_color: "Custom"
+                text_color: "white"
+
+            Widget:  # Spacer
+                size_hint_x: 0.5
+
+            MDIconButton:
+                icon: "map"
+                on_release: app.map_page()
+                theme_text_color: "Custom"
+                text_color: "white"
+
+
+            Widget:  # Spacer
+                size_hint_x: 0.5
+
+            MDIconButton:
+                icon: "account"
+                on_release: app.profile_page()
+                theme_text_color: "Custom"
+                text_color: "white"
