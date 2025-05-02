@@ -180,7 +180,7 @@ class RegisterScreen(Screen):
             print("User registered successfully!")
 
             # Redirect to homepage
-            self.manager.current = "homepage"
+            self.manager.current = "profile"
 
         except sqlite3.IntegrityError:
             print("Nickname or email already exists!")
@@ -293,8 +293,8 @@ class MapScreen(Screen):
         try:
             cursor.execute("SELECT lat, lon FROM trees")
             trees = cursor.fetchall()
-            print(f"Loaded {len(trees)} trees")  
-            
+            print(f"Loaded {len(trees)} trees")
+
             for tree in trees:
                 marker = MapMarkerPopup(
                     lat=tree['lat'],
@@ -303,17 +303,17 @@ class MapScreen(Screen):
                 )
                 marker.size_hint = (None, None)
                 marker.size = (30, 30)
-                
+
                 content = BoxLayout(orientation='vertical', size=(200, 100))
                 content.add_widget(Button(
-                    text="Details", 
+                    text="Details",
                     size_hint_y=None,
                     height=40
                 ))
                 marker.add_widget(content)
-                
+
                 mapview.add_marker(marker)
-            
+
             if trees:
                 mapview.center_on(trees[0]['lat'], trees[0]['lon'])
                 mapview.zoom = 3
@@ -325,9 +325,131 @@ class MapScreen(Screen):
             conn.close()
 # Map finish
 
-# Profile start
+
+from kivy.uix.screenmanager import Screen
+from kivy.uix.button import Button
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.gridlayout import GridLayout
+import random
+
+from kivy.uix.screenmanager import Screen
+from kivy.uix.button import Button
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.boxlayout import BoxLayout
+from functools import partial
+import random
+
+from kivy.uix.screenmanager import Screen
+from kivy.uix.button import Button
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.boxlayout import BoxLayout
+from functools import partial
+import sqlite3
+
+
 class ProfileScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        super(ProfileScreen, self).__init__(**kwargs)
+        self.db_connection = sqlite3.connect('GoGreen.db')
+        self.cursor = self.db_connection.cursor()
+        self.registered_trees = []  # Initially empty list for trees
+
+    def on_enter(self):
+        """This method is called every time the ProfileScreen is entered."""
+        self.nickname = App.get_running_app().current_user_nickname  # Update nickname from app state
+        if self.nickname:
+            self.registered_trees = self.get_registered_trees()  # Fetch trees
+            self.build_profile_ui()  # Update the UI with new tree data
+
+    def get_registered_trees(self):
+        self.cursor.execute('''SELECT user_id FROM users WHERE nickname = ?''', (self.nickname,))
+        user_row = self.cursor.fetchone()
+        if user_row:
+            user_id = user_row[0]
+            self.cursor.execute('''SELECT name, desc, lat, lon FROM trees WHERE user_id = ?''', (user_id,))
+            rows = self.cursor.fetchall()
+            trees = [{'name': row[0], 'desc': row[1], 'lat': row[2], 'lon': row[3]} for row in rows]
+
+            return trees
+        return []  # No trees for this user
+
+    def build_profile_ui(self):
+        # Profile UI: scrollable list of trees registered by the user
+        scroll_layout = ScrollView(size_hint=(1, None), height=self.height - 150)
+        grid = GridLayout(cols=1, size_hint_y=None)
+        grid.bind(minimum_height=grid.setter('height'))
+
+        for tree in self.registered_trees:
+            card = Button(
+                text=f"{tree['name']}\nLat: {tree['lat']} | Lon: {tree['lon']}",
+                size_hint=(None, None),
+                size=(self.width - 50, 120),
+                background_normal='',
+                background_color=(0.4, 0.8, 0.4, 1),  # Light green
+                font_size=18,
+                valign='middle',
+                halign='center',
+                pos_hint={'center_x': 0.5}
+            )
+            card.bind(on_press=partial(self.show_tree_details, tree))
+            grid.add_widget(card)
+
+        scroll_layout.add_widget(grid)
+        self.add_widget(scroll_layout)
+
+    from kivy.uix.popup import Popup
+
+    # Modify the show_tree_details method
+    def show_tree_details(self, trees, instance):
+        """Popup showing detailed information of the tree."""
+        content = BoxLayout(orientation='vertical', padding=10)
+
+        # Full width label for the tree name
+        content.add_widget(Label(
+            text=f"Tree Name: {trees['name']}",
+            font_size=18,
+            size_hint_x=1,  # Fill the entire width
+            text_size=(self.width - 20, None),  # Set text size to match parent's width
+            halign="center",  # Align text to the center
+            valign="middle",  # Align text vertically
+        ))
+
+        # Add the description of the tree
+        content.add_widget(Label(
+            text=f"Description: {trees['desc']}",
+            font_size=14,
+            size_hint_x=1,  # Fill the entire width
+            text_size=(self.width - 20, None),
+            halign="center",
+            valign="middle",
+        ))
+
+        # Close Button
+        close_button = Button(
+            text="Close",
+            size_hint_y=None,
+            height=40,
+            on_press=self.close_popup
+        )
+        content.add_widget(close_button)
+
+        # Create a Popup
+        self.popup = Popup(title="Tree Details", content=content, size_hint=(0.8, 0.6))
+        self.popup.open()
+
+    def close_popup(self, instance):
+        """Handle popup close and restore navbar state."""
+        # Close the popup
+        self.popup.dismiss()
+
 
 # Profile finish
 
