@@ -24,13 +24,16 @@
             canvas.after:
                 PopMatrix
 
-        # Profile title
+        # Profile title with adjusted position
         BoxLayout:
             orientation: "vertical"
             size_hint_y: None
             height: dp(100)
             pos_hint: {"top": 1}
             spacing: dp(6)
+
+            # Add padding here to push labels down
+            padding: dp(50), dp(20), dp(20), dp(10)  # Top, Left, Right, Bottom padding
 
             Label:
                 text: "[b][color=528265]My Profile[/color][/b]"
@@ -42,6 +45,13 @@
                 text_size: self.size
                 size_hint: 1, 1
 
+            MDLabel:
+                id: user_tree_label
+                text: ""
+                halign: "center"
+                font_style: "H6"
+
+
         # Main content (placeholder for profile info)
         BoxLayout:
             orientation: 'vertical'
@@ -50,6 +60,18 @@
             padding: dp(10)
 
             # Add profile content here
+
+            BoxLayout:
+                orientation: "vertical"
+                ScrollView:
+                    MDBoxLayout:
+                        id: tree_list
+                        orientation: "vertical"
+                        size_hint_y: None
+                        height: self.minimum_height
+                        padding: dp(10)
+                        spacing: dp(10)
+
 
         # Bottom navigation bar (always visible)
         MDBoxLayout:
@@ -70,7 +92,7 @@
 
             MDIconButton:
                 icon: "forest"
-                on_release: app.treetracker_page()
+                on_release: app.tree_reg_page()
                 theme_text_color: "Custom"
                 text_color: "white"
 

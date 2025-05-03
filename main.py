@@ -17,6 +17,7 @@ from kivy.uix.button import Button
 from kivy.uix.progressbar import ProgressBar
 from kivy.graphics import Color, Rectangle
 from kivy.properties import NumericProperty
+global current_user_nickname
 
 # imports for map
 from kivy_garden.mapview import MapView
@@ -38,6 +39,15 @@ Window.size = (400, 600)
 
 # Database setup
 import sqlite3
+
+def get_user_id_by_nickname(nickname):
+    conn = sqlite3.connect("GoGreen.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT user_id FROM users WHERE nickname = ?", (nickname,))
+    result = cursor.fetchone()
+    conn.close()
+    return result[0] if result else None
+
 
 # Connect to the database
 conn = sqlite3.connect("GoGreen.db")
@@ -65,6 +75,26 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS trees (
 )
 ''')
 
+
+def fetch_user_trees(user_id):
+    conn = sqlite3.connect('GoGreen.db')
+    c = conn.cursor()
+
+    c.execute('SELECT * FROM trees WHERE user_id = ?', (user_id,))
+    trees = c.fetchall()
+
+    conn.close()
+    return trees
+
+def add_tree(user_id, name, lat, lon, description):
+    conn = sqlite3.connect('GoGreen.db')
+    c = conn.cursor()
+
+    c.execute('INSERT INTO trees (user_id, name, lat, lon, desc) VALUES (?, ?, ?, ?, ?)',
+              (user_id, name, lat, lon, description))
+
+    conn.commit()
+    conn.close()
 # Enable foreign key constraints (ensure that foreign keys work)
 cursor.execute('PRAGMA foreign_keys = ON')
 
@@ -178,8 +208,9 @@ class RegisterScreen(Screen):
                            (full_name, nickname, email, password))
             conn.commit()
             print("User registered successfully!")
+            app = App.get_running_app()
+            app.current_user_nickname = nickname  # Store the current user's nickname
 
-            # Redirect to homepage
             self.manager.current = "profile"
 
         except sqlite3.IntegrityError:
@@ -355,151 +386,133 @@ from functools import partial
 import sqlite3
 
 
+from kivy.uix.screenmanager import Screen
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+
+from kivy.uix.label import Label
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+
+class TreeCard(BoxLayout):
+    def __init__(self, name, lat, lon, tree_id, **kwargs):
+        super().__init__(**kwargs)
+        self.orientation = "vertical"
+        self.size_hint_y = None
+        self.height = 120
+        self.spacing = 5
+
+        self.tree_id = tree_id
+
+        self.name_label = Label(text=f"{name}", font_size=18)
+        self.lat_label = Label(text=f"Latitude: {lat}", font_size=14)
+        self.lon_label = Label(text=f"Longitude: {lon}", font_size=14)
+
+        self.details_button = Button(text="View Details", size_hint_y=None, height=40)
+        self.details_button.bind(on_press=self.on_details_button_pressed)
+
+        self.add_widget(self.name_label)
+        self.add_widget(self.lat_label)
+        self.add_widget(self.lon_label)
+        self.add_widget(self.details_button)
+
+    def on_details_button_pressed(self, instance):
+        self.parent.parent.view_tree_details(self.tree_id)
+
+
+
+from kivy.uix.screenmanager import Screen
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.scrollview import ScrollView
+
+from kivy.uix.screenmanager import Screen
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.scrollview import ScrollView
+from kivy.core.window import Window
+from kivy.uix.textinput import TextInput
+
 class ProfileScreen(Screen):
-    def __init__(self, **kwargs):
-        super(ProfileScreen, self).__init__(**kwargs)
-        self.db_connection = sqlite3.connect('GoGreen.db')
-        self.cursor = self.db_connection.cursor()
-        self.registered_trees = []  # Initially empty list for trees
-
     def on_enter(self):
-        """This method is called every time the ProfileScreen is entered."""
-        self.nickname = App.get_running_app().current_user_nickname  # Update nickname from app state
-        if self.nickname:
-            self.registered_trees = self.get_registered_trees()  # Fetch trees
-            self.build_profile_ui()  # Update the UI with new tree data
+        self.display_user_trees()
 
-    def get_registered_trees(self):
-        self.cursor.execute('''SELECT user_id FROM users WHERE nickname = ?''', (self.nickname,))
-        user_row = self.cursor.fetchone()
-        if user_row:
-            user_id = user_row[0]
-            self.cursor.execute('''SELECT name, desc, lat, lon FROM trees WHERE user_id = ?''', (user_id,))
-            rows = self.cursor.fetchall()
-            trees = [{'name': row[0], 'desc': row[1], 'lat': row[2], 'lon': row[3]} for row in rows]
+        app = App.get_running_app()
+        nickname = app.current_user_nickname
 
-            return trees
-        return []  # No trees for this user
+        # Fetch user ID
+        conn = sqlite3.connect("GoGreen.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT user_id FROM users WHERE nickname = ?", (nickname,))
+        user = cursor.fetchone()
 
-    def build_profile_ui(self):
-        # Profile UI: scrollable list of trees registered by the user
-        scroll_layout = ScrollView(size_hint=(1, None), height=self.height - 150)
-        grid = GridLayout(cols=1, size_hint_y=None)
-        grid.bind(minimum_height=grid.setter('height'))
+        if user:
+            user_id = user[0]
+            cursor.execute("SELECT COUNT(*) FROM trees WHERE user_id = ?", (user_id,))
+            tree_count = cursor.fetchone()[0]
+            self.ids.user_tree_label.text = f"{nickname}, you have {tree_count} registered trees"
+        else:
+            self.ids.user_tree_label.text = "User not found."
 
-        for tree in self.registered_trees:
-            card = Button(
-                text=f"{tree['name']}\nLat: {tree['lat']} | Lon: {tree['lon']}",
-                size_hint=(None, None),
-                size=(self.width - 50, 120),
-                background_normal='',
-                background_color=(0.4, 0.8, 0.4, 1),  # Light green
-                font_size=18,
-                valign='middle',
-                halign='center',
-                pos_hint={'center_x': 0.5}
+        conn.close()
+
+    def display_user_trees(self):
+        app = App.get_running_app()
+        nickname = app.current_user_nickname
+        user_id = get_user_id_by_nickname(nickname)
+
+        if not user_id:
+            print("User ID not found.")
+            return
+
+        trees = fetch_user_trees(user_id)
+
+        tree_list = self.ids.tree_list
+        tree_list.clear_widgets()
+
+        for tree in trees:
+            tree_card = MDCard(
+                orientation="vertical",
+                padding=dp(10),
+                size_hint_y=None,
+                height=dp(80),
+                md_bg_color=(0.9, 1, 0.9, 1),
+                radius=[8],
             )
-            card.bind(on_press=partial(self.show_tree_details, tree))
-            grid.add_widget(card)
+            tree_card.add_widget(MDLabel(text=f"🌳 {tree[2]}", halign="left", theme_text_color="Primary"))  # name
+            tree_card.add_widget(MDLabel(text=f"📍 {tree[5]}, {tree[6]}", halign="left", theme_text_color="Secondary"))  # lat/lon
+            tree_card.add_widget(MDLabel(text=f"📝 {tree[4]}", halign="left", theme_text_color="Secondary"))  # desc
 
-        scroll_layout.add_widget(grid)
-        self.add_widget(scroll_layout)
-
-    from kivy.uix.popup import Popup
-
-    # Modify the show_tree_details method
-    def show_tree_details(self, trees, instance):
-        """Popup showing detailed information of the tree."""
-        content = BoxLayout(orientation='vertical', padding=10)
-
-        # Full width label for the tree name
-        content.add_widget(Label(
-            text=f"Tree Name: {trees['name']}",
-            font_size=18,
-            size_hint_x=1,  # Fill the entire width
-            text_size=(self.width - 20, None),  # Set text size to match parent's width
-            halign="center",  # Align text to the center
-            valign="middle",  # Align text vertically
-        ))
-
-        # Add the description of the tree
-        content.add_widget(Label(
-            text=f"Description: {trees['desc']}",
-            font_size=14,
-            size_hint_x=1,  # Fill the entire width
-            text_size=(self.width - 20, None),
-            halign="center",
-            valign="middle",
-        ))
-
-        # Close Button
-        close_button = Button(
-            text="Close",
-            size_hint_y=None,
-            height=40,
-            on_press=self.close_popup
-        )
-        content.add_widget(close_button)
-
-        # Create a Popup
-        self.popup = Popup(title="Tree Details", content=content, size_hint=(0.8, 0.6))
-        self.popup.open()
-
-    def close_popup(self, instance):
-        """Handle popup close and restore navbar state."""
-        # Close the popup
-        self.popup.dismiss()
-
+            tree_list.add_widget(tree_card)
 
 # Profile finish
 
 
 #Tree registration start
-class TreeTrackerScreen(Screen):
+from kivy.uix.screenmanager import Screen
+from kivy.uix.textinput import TextInput
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+from kivy.uix.boxlayout import BoxLayout
+
+class TreeRegistrationScreen(Screen):
+
     def register_tree(self):
         name = self.ids.name.text
-        desc = self.ids.desc.text
-        species = self.ids.specie.text
-        lat = self.ids.latitude.text
-        lon = self.ids.longitude.text
+        lat = float(self.ids.lat.text)
+        lon = float(self.ids.lan.text)
+        description = self.ids.desc.text
 
-        if not name or not species or not desc or not lat or not lon:
-            print("All fields are required!")
-            return
+        # Call your existing tree registration function here
+        add_tree(App.get_running_app().current_user_nickname, name, lat, lon, description)  # This should be your existing function to add the tree
+        print(App.get_running_app().current_user_nickname)
+        # Go back to profile screen
+        self.manager.current = 'profile'
 
-        try:
-            lat = float(lat)
-            lon = float(lon)
-        except ValueError:
-            print("Latitude and Longitude must be valid numbers!")
-            return
 
-        user_nickname = App.get_running_app().current_user_nickname
-        conn = sqlite3.connect("GoGreen.db")
-        cursor = conn.cursor()
-        cursor.execute("SELECT user_id FROM users WHERE nickname = ?", (user_nickname,))
-        result = cursor.fetchone()
-        if result:
-            user_id = result[0]
-        else:
-            print("User not found.")
-            return
-
-        try:
-            cursor.execute(
-                "INSERT INTO trees (user_id, name, species, desc, lat, lon) VALUES (?, ?, ?, ?, ?, ?)",
-                (user_id, name, species, desc, lat, lon),
-            )
-            conn.commit()
-            print("Tree registered successfully!")
-
-            # Redirect to homepage
-            self.manager.current = "homepage"
-
-        except Exception as e:
-            print(f"Error inserting tree: {e}")
-        finally:
-            conn.close()
 
 # Tree registration end
 
@@ -518,7 +531,7 @@ class GoGreenApp(MDApp):
         Builder.load_file("screens/login_screen.kv")  # login .kv file
         Builder.load_file("screens/home_screen.kv")  # home .kv file
         Builder.load_file("screens/leaderboard_screen.kv")  # leaderboard .kv file
-        Builder.load_file("screens/treetracker_screen.kv")  # challenges .kv file
+        Builder.load_file("screens/treetracker_screen.kv")  # tracker .kv file
         Builder.load_file("screens/map_screen.kv")  # map .kv file
         Builder.load_file("screens/profile_screen.kv")  # profile .kv file
 
@@ -536,7 +549,9 @@ class GoGreenApp(MDApp):
         sm.add_widget(LeaderboardScreen(name="leaderboard"))
         sm.add_widget(ProfileScreen(name="profile"))
         sm.add_widget(MapScreen(name="map"))
-        sm.add_widget(TreeTrackerScreen(name="treetracker"))
+        sm.add_widget(TreeRegistrationScreen(name="tree_reg"))
+
+
 
         sm.current = "welcome"  # Start with WelcomeScreen
         return sm
@@ -549,9 +564,6 @@ class GoGreenApp(MDApp):
 
     def home_page(self):
         self.root.current = "homepage"
-
-    def treetracker_page(self):
-        self.root.current = "treetracker"
 
     def map_page(self):
         self.root.current = "map"

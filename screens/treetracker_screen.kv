@@ -1,5 +1,5 @@
-<TreeTrackerScreen>:
-    name: 'treetracker'
+<TreeRegistrationScreen>:
+    name: 'tree_reg'
     FloatLayout:
 
         Image:
@@ -94,7 +94,7 @@
                 pos_hint: {"center_x": 0.5}
 
                 TextInput:
-                    id: latitude
+                    id: lat
                     hint_text: "LAT"
                     hint_text_color: 0.5, 0.5, 0.5, 1
                     foreground_color: 0.5, 0.5, 0.5, 1
@@ -111,7 +111,7 @@
                             rounded_rectangle: (*self.pos, *self.size, 20)
 
                 TextInput:
-                    id: longitude
+                    id: lan
                     hint_text: "LAN"
                     hint_text_color: 0.5, 0.5, 0.5, 1
                     foreground_color: 0.5, 0.5, 0.5, 1
@@ -180,7 +180,7 @@
 
             MDIconButton:
                 icon: "forest"
-                on_release: app.treetracker_page()
+                on_release: app.tree_reg_page()
                 theme_text_color: "Custom"
                 text_color: "white"
 
