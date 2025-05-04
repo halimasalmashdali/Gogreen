@@ -334,7 +334,7 @@ class MapScreen(Screen):
                 )
                 marker.size_hint = (None, None)
                 marker.size = (30, 30)
-
+                print('working 1')
                 content = BoxLayout(orientation='vertical', size=(200, 100))
                 content.add_widget(Button(
                     text="Details",
@@ -344,11 +344,12 @@ class MapScreen(Screen):
                 marker.add_widget(content)
 
                 mapview.add_marker(marker)
-
+                print('working 2')
             if trees:
+                print('working 3')
                 mapview.center_on(trees[0]['lat'], trees[0]['lon'])
                 mapview.zoom = 3
-
+                print('working 4')
         except Exception as e:
             print(f"Error loading map: {e}")
         finally:
@@ -436,6 +437,22 @@ from kivy.uix.scrollview import ScrollView
 from kivy.core.window import Window
 from kivy.uix.textinput import TextInput
 
+
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.graphics import RoundedRectangle
+from kivy.uix.widget import Widget
+from kivy.uix.scrollview import ScrollView
+from functools import partial
+import sqlite3
+
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.graphics import RoundedRectangle
+from kivy.uix.screenmanager import Screen
+import sqlite3
+
 class ProfileScreen(Screen):
     def on_enter(self):
         self.display_user_trees()
@@ -487,6 +504,7 @@ class ProfileScreen(Screen):
             tree_card.add_widget(MDLabel(text=f"📝 {tree[4]}", halign="left", theme_text_color="Secondary"))  # desc
 
             tree_list.add_widget(tree_card)
+
 
 # Profile finish
 
