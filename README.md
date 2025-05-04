@@ -11,17 +11,27 @@ GoGreen/
             decor.png
             login_photo.png
             logo.png
+            tree_icon.png
             ...
+        Poppins-SemiBold.ttf
+    cache/
+         ...
     screens/
+            home_screen.kv
+            leaderboard_screen.kv
             login_screen.kv
+            map_screen.kv
+            profile_screen.kv
             reg_screen.kv
+            treetracker_screen.kv
             welcome_screen.kv
-            ...
+
     .gitignore
+    GoGreen.db
     main.py
     README.md
     requirements.txt
-    users.db
+    users_test_db.py
 ```
 
 ## Getting Started
@@ -35,20 +45,26 @@ To run the GoGreen app locally, follow these steps:
    ```
 
 2. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Set up the environment variables:
-
-   - Create a `.env` file in the project root.
-   - Add the following lines to the `.env` file:
-
-     ```env
-     DATABASE_URL=sqlite:///users.db
+   - First create Virtual Environment:
+      ``` bash
+      python -m venv venv
+   - Download all requirements 
+      ```bash
+      pip install -r requirements.txt
+     
+3. Download Kivy Garden:
+   
+      - Run these commands on your terminal
+     ``` bash
+   pip install kivy_garden.mapview
+   garden install mapview
      ```
-
-4. Run the app:
+4. Create test users and trees
+   - Run the users_test_db.py
+   ```bash
+   users_test_db.py 
+   ```
+5. Run the app:
 
    ```bash
    python main.py
@@ -70,23 +86,20 @@ The app widget should automatically open in your screen
 Holds all screen actions and connections
 Entry point for running the server. Initializes the Kivy app and database communication events.
 
-### `.env`
+### `assets/`
 
-Configuration settings for the app, including the secret keys and database URI.
+Directory where all photos and fonts used in app are saved.
+### `GoGreen.db`
 
-### `database.py`
+Database file. Saves registration information for both users and trees in separate tables
 
-Database models and schema definition using SQLAlchemy. Includes user, challanges and news models.
-
-### `screens`
+### `screens/`
 
 Directory in which all Kivy code is written.
 
-### `assets`
+### `cache/`
 
-Directory where all assets such as font and images are stored
-
-### `server.py`
+Directory where the map photos are saved. Directory is created automatically
 
 
 ## ⛏️ Built With <a name = "tech_stack"></a>
