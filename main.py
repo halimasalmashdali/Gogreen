@@ -75,6 +75,16 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS trees (
 )
 ''')
 
+# Create news table
+
+cursor.execute('''CREATE TABLE IF NOT EXISTS news (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    title TEXT,
+                    author_name TEXT,
+                    photo TEXT,
+                    text TEXT,
+                    date_created TEXT)''')
+
 
 def fetch_user_trees(user_id):
     conn = sqlite3.connect('GoGreen.db')
@@ -86,15 +96,22 @@ def fetch_user_trees(user_id):
     conn.close()
     return trees
 
+
 def add_tree(user_id, name, lat, lon, description):
     conn = sqlite3.connect('GoGreen.db')
     c = conn.cursor()
 
+    # Insert the tree data into the database
     c.execute('INSERT INTO trees (user_id, name, lat, lon, desc) VALUES (?, ?, ?, ?, ?)',
               (user_id, name, lat, lon, description))
 
-    conn.commit()
+    conn.commit()  # Ensure the transaction is saved
     conn.close()
+
+    # Debugging: log the insertion
+    print(f"Added tree: {name} at ({lat}, {lon}) for user {user_id}")
+
+
 # Enable foreign key constraints (ensure that foreign keys work)
 cursor.execute('PRAGMA foreign_keys = ON')
 
@@ -392,118 +409,42 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 
-from kivy.uix.label import Label
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-
-class TreeCard(BoxLayout):
-    def __init__(self, name, lat, lon, tree_id, **kwargs):
-        super().__init__(**kwargs)
-        self.orientation = "vertical"
-        self.size_hint_y = None
-        self.height = 120
-        self.spacing = 5
-
-        self.tree_id = tree_id
-
-        self.name_label = Label(text=f"{name}", font_size=18)
-        self.lat_label = Label(text=f"Latitude: {lat}", font_size=14)
-        self.lon_label = Label(text=f"Longitude: {lon}", font_size=14)
-
-        self.details_button = Button(text="View Details", size_hint_y=None, height=40)
-        self.details_button.bind(on_press=self.on_details_button_pressed)
-
-        self.add_widget(self.name_label)
-        self.add_widget(self.lat_label)
-        self.add_widget(self.lon_label)
-        self.add_widget(self.details_button)
-
-    def on_details_button_pressed(self, instance):
-        self.parent.parent.view_tree_details(self.tree_id)
-
-
-
-from kivy.uix.screenmanager import Screen
-from kivy.uix.button import Button
-from kivy.uix.label import Label
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.scrollview import ScrollView
-
-from kivy.uix.screenmanager import Screen
-from kivy.uix.button import Button
-from kivy.uix.label import Label
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.scrollview import ScrollView
-from kivy.core.window import Window
-from kivy.uix.textinput import TextInput
-
-
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.uix.button import Button
-from kivy.graphics import RoundedRectangle
 from kivy.uix.widget import Widget
-from kivy.uix.scrollview import ScrollView
-from functools import partial
 import sqlite3
 
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.graphics import RoundedRectangle
 from kivy.uix.screenmanager import Screen
-import sqlite3
+from kivy.app import App
+from kivymd.uix.card import MDCard
+from kivymd.uix.label import MDLabel
+from kivy.metrics import dp
+
 
 class ProfileScreen(Screen):
     def on_enter(self):
-        self.display_user_trees()
+        self.load_user_trees()
 
+    def load_user_trees(self):
         app = App.get_running_app()
-        nickname = app.current_user_nickname
+        user_id = get_user_id_by_nickname(app.current_user_nickname)  # Get user ID from nickname
+        if user_id:  # Ensure user_id is valid
+            trees = fetch_user_trees(user_id)  # Fetch trees for the user
+            tree_list = self.ids.tree_list  # Ensure you have a tree_list in your kv file
+            tree_list.clear_widgets()  # Clear existing widgets before adding new ones
+            print(trees)
+            for tree in trees:
+                tree_card = MDCard(
+                    orientation="vertical",
+                    padding=dp(10),
+                    size_hint_y=None,
+                    height=dp(80),
+                    md_bg_color=(0.9, 1, 0.9, 1),  # Set background color
+                    radius=[8],  # Rounded corners
+                )
+                tree_card.add_widget(
+                    MDLabel(text=f"🌳 {tree[2]}", halign="left", theme_text_color="Primary"))  # Tree name
+                tree_card.add_widget(MDLabel(text=f"📍 {tree[5]}, {tree[6]}", halign="left"))  # Location
 
-        # Fetch user ID
-        conn = sqlite3.connect("GoGreen.db")
-        cursor = conn.cursor()
-        cursor.execute("SELECT user_id FROM users WHERE nickname = ?", (nickname,))
-        user = cursor.fetchone()
-
-        if user:
-            user_id = user[0]
-            cursor.execute("SELECT COUNT(*) FROM trees WHERE user_id = ?", (user_id,))
-            tree_count = cursor.fetchone()[0]
-            self.ids.user_tree_label.text = f"{nickname}, you have {tree_count} registered trees"
-        else:
-            self.ids.user_tree_label.text = "User not found."
-
-        conn.close()
-
-    def display_user_trees(self):
-        app = App.get_running_app()
-        nickname = app.current_user_nickname
-        user_id = get_user_id_by_nickname(nickname)
-
-        if not user_id:
-            print("User ID not found.")
-            return
-
-        trees = fetch_user_trees(user_id)
-
-        tree_list = self.ids.tree_list
-        tree_list.clear_widgets()
-
-        for tree in trees:
-            tree_card = MDCard(
-                orientation="vertical",
-                padding=dp(10),
-                size_hint_y=None,
-                height=dp(80),
-                md_bg_color=(0.9, 1, 0.9, 1),
-                radius=[8],
-            )
-            tree_card.add_widget(MDLabel(text=f"🌳 {tree[2]}", halign="left", theme_text_color="Primary"))  # name
-            tree_card.add_widget(MDLabel(text=f"📍 {tree[5]}, {tree[6]}", halign="left", theme_text_color="Secondary"))  # lat/lon
-            tree_card.add_widget(MDLabel(text=f"📝 {tree[4]}", halign="left", theme_text_color="Secondary"))  # desc
-
-            tree_list.add_widget(tree_card)
+                tree_list.add_widget(tree_card)  # Add the tree card to the UI
 
 
 # Profile finish
@@ -517,19 +458,34 @@ from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 
 class TreeRegistrationScreen(Screen):
-
     def register_tree(self):
         name = self.ids.name.text
         lat = float(self.ids.lat.text)
         lon = float(self.ids.lan.text)
         description = self.ids.desc.text
 
-        # Call your existing tree registration function here
-        add_tree(App.get_running_app().current_user_nickname, name, lat, lon, description)  # This should be your existing function to add the tree
-        print(App.get_running_app().current_user_nickname)
+        conn = sqlite3.connect('GoGreen.db')
+        c = conn.cursor()
+
+        # Get the user ID based on the current user's nickname
+        c.execute('SELECT user_id FROM users WHERE nickname = ?', (App.get_running_app().current_user_nickname,))
+        user_id = c.fetchone()
+
+        if user_id is None:
+            print("User not found!")
+            return
+
+        user_id = user_id[0]  # Extract the user_id from the query result
+
+        # Insert the tree data into the database
+        c.execute('INSERT INTO trees (user_id, name, lat, lon, desc) VALUES (?, ?, ?, ?, ?)',
+                  (user_id, name, lat, lon, description))
+
+        conn.commit()  # Ensure the transaction is saved
+        conn.close()
+
         # Go back to profile screen
         self.manager.current = 'profile'
-
 
 
 # Tree registration end
