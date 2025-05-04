@@ -60,17 +60,18 @@ To run the GoGreen app locally, follow these steps:
    garden install mapview
      ```
 4. Run the app
-   - Run the main.py to create database
+   - Run the main.py to create database and start using the app
    ```bash
-   main.py 
+   main.py
    ```
-5. Create test users and trees if needed
+
+The app widget should automatically open in your screen
+6. Create test users and trees if needed
    - Run the users_test_db.py to get random users with random amount of trees registered
    ```bash
    users_test_db.py 
    ```
 
-The app widget should automatically open in your screen
 
 ## Features
 
