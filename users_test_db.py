@@ -5,6 +5,7 @@ conn = sqlite3.connect("GoGreen.db")
 cursor = conn.cursor()
 
 # Sample data for users
+
 user_data = [
     ("Alice Johnson", "alicej", "alice@example.com", "pass123", "user"),
     ("Bob Smith", "bobster", "bob@example.com", "pass456", "user"),

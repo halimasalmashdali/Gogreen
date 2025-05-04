@@ -59,17 +59,16 @@ To run the GoGreen app locally, follow these steps:
    pip install kivy_garden.mapview
    garden install mapview
      ```
-4. Create test users and trees
-   - Run the users_test_db.py
+4. Run the app
+   - Run the main.py to create database
+   ```bash
+   main.py 
+   ```
+5. Create test users and trees if needed
+   - Run the users_test_db.py to get random users with random amount of trees registered
    ```bash
    users_test_db.py 
    ```
-5. Run the app:
-
-   ```bash
-   python main.py
-   ```
-
 
 The app widget should automatically open in your screen
 
