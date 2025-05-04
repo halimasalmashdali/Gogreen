@@ -1,4 +1,5 @@
-<HomepageScreen>:
+<NewsScreen>:
+    name: "homepage"
     FloatLayout:
         Image:
             source: "assets/photos/decor.png"
@@ -19,37 +20,28 @@
             canvas.after:
                 PopMatrix
 
-        Widget:
-            size_hint_y:0.05
+        # ScrollView for News Items
         ScrollView:
-            do_default_tab: True
-            GridLayout:
-                id: news
-                cols: 1  
-                spacing: dp(20)
-                padding: dp(5)
-                size_hint_y: None
-                height: self.minimum_height
-                
-                Button:
-                    text: "news"
-                    size_hint_y: None
-                    height: dp(100)
-                Button:
-                    text: "news"
-                    size_hint_y: None
-                    height: dp(100)
-                Button:
-                    text: "news"
-                    size_hint_y: None
-                    height: dp(100)
+            size_hint: (1, None)
+            height: 500  # Increased height of the ScrollView
+            pos_hint: {"top": 0.85}  # Adjust this to position scroll area correctly
+            do_scroll_x: False
 
-        # Custom bottom bar - NO FAB SPACE
+            BoxLayout:
+                id: news_box  # News items will be added here
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height  # This will make the box grow dynamically with the news content
+                spacing: dp(10)
+                padding: dp(10)
+
+        # Bottom navigation bar
         MDBoxLayout:
             size_hint_y: None
             height: dp(56)
             md_bg_color: app.theme_cls.primary_color
             padding: dp(10)
+            pos_hint: {"x": 0, "y": 0}
 
             MDIconButton:
                 icon: "home"
@@ -57,7 +49,7 @@
                 theme_text_color: "Custom"
                 text_color: "white"
 
-            Widget:  # Spacer
+            Widget:
                 size_hint_x: 0.5
 
             MDIconButton:
@@ -66,7 +58,7 @@
                 theme_text_color: "Custom"
                 text_color: "white"
 
-            Widget:  # Spacer
+            Widget:
                 size_hint_x: 0.5
 
             MDIconButton:
@@ -75,7 +67,7 @@
                 theme_text_color: "Custom"
                 text_color: "white"
 
-            Widget:  # Spacer
+            Widget:
                 size_hint_x: 0.5
 
             MDIconButton:
@@ -84,8 +76,7 @@
                 theme_text_color: "Custom"
                 text_color: "white"
 
-
-            Widget:  # Spacer
+            Widget:
                 size_hint_x: 0.5
 
             MDIconButton:

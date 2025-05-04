@@ -1,8 +1,10 @@
 import sqlite3
 from functools import partial
 
+from kivy.core.image import Image
 # all kivy imports
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.scrollview import ScrollView
 from kivy.uix.stacklayout import StackLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen, ScreenManager
@@ -17,6 +19,8 @@ from kivy.uix.button import Button
 from kivy.uix.progressbar import ProgressBar
 from kivy.graphics import Color, Rectangle
 from kivy.properties import NumericProperty
+from kivymd.uix.button import MDRaisedButton
+
 global current_user_nickname
 
 # imports for map
@@ -39,6 +43,7 @@ Window.size = (400, 600)
 
 # Database setup
 import sqlite3
+
 
 def get_user_id_by_nickname(nickname):
     conn = sqlite3.connect("GoGreen.db")
@@ -119,7 +124,6 @@ cursor.execute('PRAGMA foreign_keys = ON')
 conn.commit()
 conn.close()
 
-
 Window.size = (400, 600)
 
 
@@ -194,9 +198,100 @@ class LeaderboardScreen(Screen):
 # Leaderboard finish
 
 # Homepage start
+import sqlite3
+from kivy.app import App
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.button import Button
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.image import Image
 
-class HomepageScreen(Screen):
-    pass
+from kivy.uix.button import Button
+from functools import partial
+import sqlite3
+from kivy.uix.screenmanager import Screen
+
+from kivy.uix.button import Button
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.screenmanager import Screen
+from functools import partial
+import sqlite3
+
+
+
+class NewsScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Delay loading data until layout is ready
+        self.bind(on_enter=self.load_news)
+
+    def load_news(self, *args):
+        self.ids.news_box.clear_widgets()
+        conn = sqlite3.connect("GoGreen.db")
+        cursor = conn.cursor()
+        cursor.execute('''SELECT id, title, text, author_name, date_created FROM news''')
+        news_data = cursor.fetchall()
+        conn.close()
+
+        for row in news_data:
+            news_id, title, description, author, timestamp = row
+            desc_trunc = description[:30] + '...'
+            button = Button(
+                text=f"[b]{title}[/b]\n[i]Author: {author}[/i]\n{desc_trunc}",
+                size_hint_y=None,
+                height=100,
+                on_press=partial(self.on_news_click, news_id),
+                markup=True,
+                background_normal='',
+                background_color=(0.2, 0.6, 0.2, 1),
+                color=(1, 1, 1, 1),
+                font_size=16,
+                padding=[10, 10],
+            )
+            self.ids.news_box.add_widget(button)
+
+    def on_news_click(self, news_id, *args):
+        self.manager.get_screen('news_detail').load_news_detail(news_id)
+        self.manager.current = 'news_detail'
+
+
+from kivy.uix.screenmanager import Screen
+from kivy.properties import StringProperty
+import sqlite3
+
+from kivy.uix.screenmanager import Screen
+from kivy.properties import StringProperty
+import sqlite3
+
+
+class NewsDetailScreen(Screen):
+    news_title = StringProperty("Loading...")
+    news_description = StringProperty("Loading...")
+    news_author = StringProperty("Unknown Author")
+    news_timestamp = StringProperty("Unknown Date")
+
+    def load_news_detail(self, news_id):
+        # Debugging: Check the news_id that is passed
+        print(f"Loading detail for news_id: {news_id}")
+
+        conn = sqlite3.connect("GoGreen.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT title, text, author_name, date_created FROM news WHERE id=?", (news_id,))
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            title, text, author, date_created = row
+            self.news_title = title
+            self.news_description = text
+            self.news_author = f"By: {author}"
+            self.news_timestamp = date_created
+        else:
+            self.news_title = "News Not Found"
+            self.news_description = ""
+            self.news_author = ""
+            self.news_timestamp = ""
 
 
 # Homepage finish
@@ -263,72 +358,6 @@ class LoginScreen(Screen):
 
 # Login finish
 
-# Challenges start
-from kivy.uix.screenmanager import Screen
-from kivy.uix.label import Label
-from kivy.uix.button import Button
-from kivy.clock import Clock
-from kivy.metrics import dp
-from functools import partial
-import sqlite3
-from kivymd.uix.card import MDCard
-from kivymd.uix.label import MDLabel
-
-
-# Challenges finish
-import sqlite3
-import sqlite3
-import random
-#
-# # Connect to the database
-# conn = sqlite3.connect("GoGreen.db")
-# cursor = conn.cursor()
-#
-# # Example user IDs (must exist in your users table)
-# user_ids = [1, 2]  # Replace with actual user IDs from your database
-#
-# # Sample tree descriptions
-# descriptions = [
-#     "Oak tree planted in community park",
-#     "Maple tree near downtown",
-#     "Pine tree in residential area",
-#     "Fruit tree in school garden",
-#     "Willow tree by the riverbank",
-#     "Redwood tree in conservation area",
-#     "Birch tree in urban plaza"
-# ]
-#
-# # Generate realistic coordinates within a city area (example: San Francisco)
-# def generate_coordinates():
-#     # Base coordinates (SF area)
-#     base_lat = 37.7749
-#     base_lon = -122.4194
-#     # Random variation (about 10km radius)
-#     lat_variation = random.uniform(-0.1, 0.1)
-#     lon_variation = random.uniform(-0.1, 0.1)
-#     return (base_lat + lat_variation, base_lon + lon_variation)
-#
-# # Insert 20 example trees
-# cursor.execute("SELECT COUNT(*) FROM trees")
-# tree_count = cursor.fetchone()[0]
-#
-# if tree_count == 0:
-#     # Insert 20 example trees
-#     for i in range(20):
-#         user_id = random.choice(user_ids)
-#         description = random.choice(descriptions)
-#         lat, lon = generate_coordinates()
-#
-#         cursor.execute('''
-#             INSERT INTO trees (user_id, desc, lat, lon)
-#             VALUES (?, ?, ?, ?)
-#         ''', (user_id, description, lat, lon))
-#
-#
-# # Commit changes and close connection
-# conn.commit()
-# conn.close()
-
 
 # Map start
 class MapScreen(Screen):
@@ -372,42 +401,10 @@ class MapScreen(Screen):
         finally:
             cursor.close()
             conn.close()
+
+
 # Map finish
 
-
-from kivy.uix.screenmanager import Screen
-from kivy.uix.button import Button
-from kivy.uix.popup import Popup
-from kivy.uix.label import Label
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.gridlayout import GridLayout
-import random
-
-from kivy.uix.screenmanager import Screen
-from kivy.uix.button import Button
-from kivy.uix.popup import Popup
-from kivy.uix.label import Label
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.boxlayout import BoxLayout
-from functools import partial
-import random
-
-from kivy.uix.screenmanager import Screen
-from kivy.uix.button import Button
-from kivy.uix.popup import Popup
-from kivy.uix.label import Label
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.boxlayout import BoxLayout
-from functools import partial
-import sqlite3
-
-
-from kivy.uix.screenmanager import Screen
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.uix.button import Button
 
 from kivy.uix.widget import Widget
 import sqlite3
@@ -450,12 +447,13 @@ class ProfileScreen(Screen):
 # Profile finish
 
 
-#Tree registration start
+# Tree registration start
 from kivy.uix.screenmanager import Screen
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
+
 
 class TreeRegistrationScreen(Screen):
     def register_tree(self):
@@ -508,7 +506,7 @@ class GoGreenApp(MDApp):
         Builder.load_file("screens/treetracker_screen.kv")  # tracker .kv file
         Builder.load_file("screens/map_screen.kv")  # map .kv file
         Builder.load_file("screens/profile_screen.kv")  # profile .kv file
-
+        Builder.load_file("screens/news_detail.kv")  # details .kv file
 
         # need to add settings
         # need to add screens for solo challenges
@@ -519,13 +517,12 @@ class GoGreenApp(MDApp):
         sm.add_widget(WelcomeScreen(name="welcome"))
         sm.add_widget(LoginScreen(name="login"))
         sm.add_widget(RegisterScreen(name="register"))
-        sm.add_widget(HomepageScreen(name="homepage"))
         sm.add_widget(LeaderboardScreen(name="leaderboard"))
         sm.add_widget(ProfileScreen(name="profile"))
         sm.add_widget(MapScreen(name="map"))
         sm.add_widget(TreeRegistrationScreen(name="tree_reg"))
-
-
+        sm.add_widget(NewsScreen(name="homepage"))
+        sm.add_widget(NewsDetailScreen(name="news_detail"))
 
         sm.current = "welcome"  # Start with WelcomeScreen
         return sm
