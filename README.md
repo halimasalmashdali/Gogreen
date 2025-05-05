@@ -66,8 +66,8 @@ To run the GoGreen app locally, follow these steps:
    ```
 
 The app widget should automatically open in your screen
-6. Create test users and trees if needed
-   - Run the users_test_db.py to get random users with random amount of trees registered
+6. Create test data if needed
+   - Run the users_test_db.py to get random users, random amount of trees registered and some random news
    ```bash
    users_test_db.py 
    ```
